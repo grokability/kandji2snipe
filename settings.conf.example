@@ -3,7 +3,7 @@ url = https://TENANTNAME.clients.us-1.kandji.io
 apikey = kandji-api-bearer-token-here
 
 [snipe-it]
-url = https://fqdn.to.your.snipe-it.here
+url = https://your_snipe_instance.com
 apikey = snipe-api-bearer-token-here
 manufacturer_id = 1
 defaultStatus = 2
@@ -14,8 +14,8 @@ appletv_model_category_id = 8
 # Asset Tag is not required, uncomment line 19 to customize
 # If not specified, the default formulas are...
 # Macs - kandji-{serial_number}
-# iPhones & iPads - kandji-a-{serial_number}
-# Apple TVs - kandji-tv-{serial_number}
+# iPhones & iPads - kandji-m-{serial_number}
+# Apple TVs - kandji-atv-{serial_number}
 #asset_tag = general serial_number 
 
 [computers-api-mapping]
