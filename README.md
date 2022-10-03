@@ -109,7 +109,7 @@ Note: do not add `""` or `''` around any values.
 
 Check out the [settings.conf.example](https://github.com/grokability/jamf2snipe/blob/main/settings.conf.example) file for the full documentation
 
-- `url`: http://*your_snipe_instance*.com
+- `url`: https://*your_snipe_instance*.com
 - `apikey`: API key generated via [these steps](https://snipe-it.readme.io/reference#generating-api-tokens).
 - `manufacturer_id`: The manufacturer database field id for the Apple in your Snipe-IT instance. You will probably have to create a Manufacturer in Snipe-IT and note its ID.
 - `defaultStatus`: The status database field id to assign to any assets created in Snipe-IT from Kandji. Usually you will want to pick a status like "Ready To Deploy" - look up its ID in Snipe-IT and put the ID here.
