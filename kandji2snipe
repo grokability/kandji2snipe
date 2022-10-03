@@ -482,7 +482,7 @@ if not KANDJI_UP:
 else:
     logging.info('We were able to get a good response from your Kandji instance.')
 
-# Exit if you can't contact SNIPE
+# Exit if you can't contact Snipe-IT or Kandji
 if ( KANDJI_UP == False ) or ( SNIPE_UP == False ):
     raise SystemExit("Error: Host could not be contacted.")
 
@@ -579,7 +579,7 @@ for kandji_device_type in kandji_device_types:
 
         # Check that the model number exists in snipe, if not create it.
         if kandji_device_type == 'mac':
-            if kandji['general']['model'] not in modelnumbers:
+            if kandji['hardware_overview']['model_identifier'] not in modelnumbers:
                 logging.info("Could not find a model ID in snipe for: {}".format(kandji['general']['model']))
                 newmodel = {"category_id":config['snipe-it']['mac_model_category_id'],"manufacturer_id":apple_manufacturer_id,"name": kandji['general']['model'],"model_number":kandji['hardware_overview']['model_identifier']}
                 if 'computer_custom_fieldset_id' in config['snipe-it']:
