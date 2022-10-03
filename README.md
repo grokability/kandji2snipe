@@ -1,13 +1,9 @@
 # kandji2snipe
 ## Import/Sync Devices from Kandji to Snipe-IT
 ```
-usage: kandji2snipe [-h] [-v] [--dryrun] [-d] [--do_not_verify_ssl] [-r] 
-                    [--no_search] [-u | -ui | -uf] 
-                    [--mac | --iphone | --ipad | --appletv]
-
-usage: jamf2snipe [-h] [-v] [--dryrun] [-d] [--do_not_verify_ssl] [-r]
-                  [--no_search] [-u | -ui | -uf] [-m | -c]
-
+usage: kandji2snipe [-h] [-v] [--dryrun] [-d] [--do_not_verify_ssl] [-r] [--no_search]
+                    [-u | -ui | -uf] [--mac | --iphone | --ipad | --appletv]
+                    
 
 optional arguments:
 -h, --help              show this help message and exit
@@ -37,9 +33,9 @@ optional arguments:
 -uns, --users_no_search Doesn't search for any users if the specified fields
                         in Kandji and Snipe don't match. (case insensitive)
 --mac                   Runs against Mac computers only
---iphone       	  	    Runs against iPhones only
---ipad       		        Runs against iPads only
---appletv         	    Runs against Apple TVs only
+--iphone                Runs against iPhones only
+--ipad                  Runs against iPads only
+--appletv               Runs against Apple TVs only
 ```
 
 
@@ -96,7 +92,7 @@ Lastly, if the asset_tag field is blank in Kandji when it is being created in Sn
 1. Copy the files to your system (recommend installing to /opt/kandji2snipe/* ). Make sure you meet all the system requirements.
 2. Edit the settings.conf to match your current environment - you can start by copying settings.conf.example to settings.conf. The script will look for a valid settings.conf in /opt/kandji2snipe/settings.conf, /etc/kandji2snipe/settings.conf, or in the current folder (in that order): so either copy the file to one of those locations, or be sure that the user running the program is in the same folder as the settings.conf.
 
-## Configuration - settings.conf: (****TO CLEAN UP(****)
+## Configuration - settings.conf: (****TO CLEAN UP****)
 
 All of the settings that are listed in the [settings.conf.example](https://github.com/grokability/jamf2snipe/blob/main/settings.conf.example) are required except for the api-mapping section. It's recommended that you install these files to /opt/kandji2snipe/ and run them from there. You will need valid subsets from [JAMF's API](https://developer.jamf.com/apis/classic-api/index) to associate fields into Snipe-IT.
 
@@ -122,7 +118,7 @@ Check out the [settings.conf.example](https://github.com/grokability/jamf2snipe/
 - `ipad_model_category_id`: The ID of the category you want to assign to iPads. You will have to create this in Snipe-IT and note the Category ID
 - `appletv_model_category_id`: The ID of the category you want to assign to Apple TVs. You will have to create this in Snipe-IT and note the Category ID
 
-### API Mapping (****TO CLEAN UP(****)
+### API Mapping (****TO CLEAN UP****)
 
 To get the database fields for Snipe-IT Custom Fields, go to Custom Fields, scroll down past Fieldsets to Custom Fields, click the column selection and button and select the unchecked 'DB Field' checkbox. Copy and paste the DB Field name for the Snipe under api-mapping in settings.conf.
 
