@@ -1,28 +1,45 @@
-[jamf]
-url = https://yourinstance.jamfcloud.com
-apikey = YOUR-API-KEY-HERE
+[kandji]
+url = https://TENANTNAME.clients.us-1.kandji.io
+apikey = kandji-api-bearer-token-here
 
 [snipe-it]
-#Required
-url = https://FQDN.your.snipe.instance.com
-apikey = YOUR-API-KEY-HERE
-manufacturer_id = 2
+url = https://fqdn.to.your.snipe-it.here
+apikey = snipe-api-bearer-token-here
+manufacturer_id = 1
 defaultStatus = 2
-computer_model_category_id = 2
-mobile_model_category_id = 3
-#Not Required, uncomment to use
-#computer_custom_fieldset_id = 3
-#mobile_custom_fieldset_id = 4
-#asset_tag = general serial_number # If not specified, defaults to jamf-{id} or jamf-m-{id}
+mac_model_category_id = 5
+iphone_model_category_id = 6
+ipad_model_category_id = 7
+appletv_model_category_id = 8
+# Asset Tag is not required, uncomment line 19 to customize
+# If not specified, the default formulas are...
+# Macs - kandji-{serial_number}
+# iPhones & iPads - kandji-a-{serial_number}
+# Apple TVs - kandji-tv-{serial_number}
+#asset_tag = general serial_number 
 
 [computers-api-mapping]
 name = general name
 _snipeit_mac_address_1 = general mac_address
 
-
 [mobile_devices-api-mapping]
 _snipeit_imei_4	= network imei
 name = general name
 
-[user-mapping] # The field from jamf that you want to search Snipe with
+[mac-api-mapping]
+name = general name
+_snipeit_mac_address_1 = general mac_address
+
+[iphone-api-mapping]
+_snipeit_imei_4	= network imei
+name = general name
+
+[ipad-api-mapping]
+_snipeit_imei_4	= network imei
+name = general name
+
+[appletv-api-mapping]
+name = general name
+
+[user-mapping] # The field from Kandji that you want to search Snipe-IT with
 jamf_api_field = location username
