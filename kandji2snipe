@@ -49,7 +49,6 @@ validsubset = [
 
 
 # Import all the things
-from cgi import test
 import json
 import requests
 import time
@@ -678,11 +677,11 @@ for kandji_device_type in kandji_device_types:
                     continue
                 if user_args.users or user_args.users_force or user_args.users_inverse:
                     kandjisplit = config['user-mapping']['kandji_api_field'].split()
-                    if kandjisplit[1] not in kandji[kandjisplit[0]]:
-                        logging.info("Couldn't find {} for this device in {}, not checking it out.".format(kandjisplit[1], kandjisplit[0]))
+                    if not kandji['{}'.format(kandjisplit[0])]['{}'.format(kandjisplit[1])]:
+                        logging.info("No user is assigned to {} in Kandji, not checking it out.".format(kandji['general']['device_name']))
                         continue
-                    logging.info('Checking out new item {} to user {}'.format(kandji['name']['device_name'], kandji['{}'.format(kandjisplit[0])]['{}'.format(kandjisplit[1])]))
-                    checkout_snipe_asset(kandji['{}'.format(kandjisplit[0])]['{}'.format(kandjisplit[1])],new_snipe_asset[1].json()['payload']['id'], "NewAsset")
+                    logging.info('Checking out new item {} to user {}'.format(kandji['general']['device_name'], kandji['{}'.format(kandjisplit[0])]['{}'.format(kandjisplit[1])]['{}'.format(kandjisplit[2])]))
+                    checkout_snipe_asset(kandji['{}'.format(kandjisplit[0])]['{}'.format(kandjisplit[1])]['{}'.format(kandjisplit[2])],new_snipe_asset[1].json()['payload']['id'], "NewAsset")
 
         # Log an error if there's an issue, or more than once match.
         elif snipe == 'MultiMatch':
@@ -755,12 +754,13 @@ for kandji_device_type in kandji_device_types:
 
                     if snipe['rows'][0]['status_label']['status_meta'] in ('deployable', 'deployed'):
                         kandjisplit = config['user-mapping']['kandji_api_field'].split()
-                        if kandjisplit[1] not in kandji[kandjisplit[0]]:
-                            logging.info("Couldn't find {} for this device in {}, not checking it out.".format(kandjisplit[1], kandjisplit[0]))
+                        if not kandji['{}'.format(kandjisplit[0])]['{}'.format(kandjisplit[1])]:
+                            logging.info("No user is assigned to {} in Kandji, not checking it out.".format(kandji['general']['device_name']))
                             continue
-                        checkout_snipe_asset(kandji['{}'.format(kandjisplit[0])]['{}'.format(kandjisplit[1])], snipe_id, snipe['rows'][0]['assigned_to'])
+                        logging.info('Checking out new item {} to user {}'.format(kandji['general']['device_name'], kandji['{}'.format(kandjisplit[0])]['{}'.format(kandjisplit[1])]['{}'.format(kandjisplit[2])]))
+                        checkout_snipe_asset(kandji['{}'.format(kandjisplit[0])]['{}'.format(kandjisplit[1])]['{}'.format(kandjisplit[2])], snipe_id, snipe['rows'][0]['assigned_to'])
                     else:
-                        logging.info("Can't checkout {} since the status isn't set to deployable".format(kandji['name']['device_name']))
+                        logging.info("Can't checkout {} since the status isn't set to deployable".format(kandji['general']['device_name']))
 
             else:
                 logging.info("Snipe Record is newer than the Kandji record. Nothing to sync. If this wrong, then force an inventory update in Kandji")
