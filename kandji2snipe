@@ -20,7 +20,7 @@
 #
 #   Using the [<platform>-api-mapping] sections, you can map Snipe-IT hardware values to Kandji values 
 #   The default example associates information that exists by default in both Snipe-IT and Kandji. 
-#   The Key value is the exact name of the snipe key name.
+#   The Key value is the exact name of the Snipe-IT key name.
 #   Value1 is the "Subset" name, and the Value2 is the Kandji key name.
 #   Note that MAC Address are a custom value in Snipe-IT by default and you can use it as an example.
 #
@@ -59,7 +59,7 @@ import logging
 # Set us up for using runtime arguments by defining them.
 runtimeargs = argparse.ArgumentParser()
 runtimeargs.add_argument("-v", "--verbose", help="Sets the logging level to INFO and gives you a better idea of what the script is doing.", action="store_true")
-runtimeargs.add_argument("--auto_incrementing", help="You can use this if you have auto-incrementing enabled in your snipe instance to utilize that instead of adding the Kandji ID for the asset tag.", action="store_true")
+runtimeargs.add_argument("--auto_incrementing", help="You can use this if you have auto-incrementing enabled in your Snipe-IT instance to utilize that instead of adding the Kandji ID for the asset tag.", action="store_true")
 runtimeargs.add_argument("--dryrun", help="This checks your config and tries to contact both the Kandji and Snipe-IT instances, but exits before updating or syncing any assets.", action="store_true")
 runtimeargs.add_argument("-d", "--debug", help="Sets logging to include additional DEBUG messages.", action="store_true")
 runtimeargs.add_argument("--do_not_update_kandji", help="Does not update Kandji with the asset tags stored in Snipe-IT.", action="store_false")
@@ -115,7 +115,7 @@ logging.info("The configured Kandji base url is: {}".format(kandji_base))
 kandji_apiKey = config['kandji']['apikey']
 logging.debug("The API key you provided for Kandji is: {}".format(kandji_apiKey))
 
-# This is the address, cname, or FQDN for your snipe-it instance.
+# This is the address, cname, or FQDN for your Snipe-IT instance.
 snipe_base = config['snipe-it']['url']
 logging.info("The configured Snipe-IT base url is: {}".format(snipe_base))
 snipe_apiKey = config['snipe-it']['apikey']
@@ -178,7 +178,7 @@ def request_handler(r, *args, **kwargs):
         snipe_api_rate = snipe_api_count / time_elapsed
         if snipe_api_rate > 1.95:
             sleep_time = 0.5 + (snipe_api_rate - 1.95)
-            logging.debug('Going over snipe rate limit of 120/minute ({}/minute), sleeping for {}'.format(snipe_api_rate,sleep_time))
+            logging.debug('Going over Snipe-IT rate limit of 120/minute ({}/minute), sleeping for {}'.format(snipe_api_rate,sleep_time))
             time.sleep(sleep_time)
         logging.debug("Made {} requests to Snipe-IT in {} seconds, with a request being sent every {} seconds".format(snipe_api_count, time_elapsed, snipe_api_rate))
     if '"messages":429' in r.text:
@@ -209,6 +209,27 @@ def get_kandji_devices(platform):
 # Function to lookup a Kandji asset by device_id.
 def search_kandji_asset(kandji_id):
     api_url = "{}/api/v1/devices/{}/details".format(kandji_base, kandji_id)
+    response = requests.get(api_url, headers=kandjiheaders, verify=user_args.do_not_verify_ssl, hooks={'response': request_handler})
+    if response.status_code == 200:
+        logging.debug("Got back a valid 200 response code.")
+        jsonresponse = response.json()
+        logging.debug("Returning: {}".format(jsonresponse))
+        return jsonresponse
+    elif b'policies.ratelimit.QuotaViolation' in response.content:
+        logging.info('Kandji responded with error code: {} - Policy Ratelimit Quota Violation - when we tried to look up id: {} Waiting a bit to retry the lookup.'.format(response, kandji_id))
+        logging.warning('Kandji Ratelimit exceeded: pausing ')
+        time.sleep(75)
+        logging.info("Finished waiting. Retrying lookup...")
+        newresponse = search_kandji_asset(kandji_id)
+        return newresponse
+    else:
+        logging.warning('Kandji responded with error code:{} when we tried to look up id: {}'.format(response, kandji_id))
+        logging.debug("Returning a null value for the function.")
+        return None
+
+# Function to lookup last activity date and time for a Kandji asset.
+def get_kandji_asset_activity_date(kandji_id):
+    api_url = "{}/api/v1/devices/{}/activity".format(kandji_base, kandji_id)
     response = requests.get(api_url, headers=kandjiheaders, verify=user_args.do_not_verify_ssl, hooks={'response': request_handler})
     if response.status_code == 200:
         logging.debug("Got back a valid 200 response code.")
@@ -305,7 +326,7 @@ def get_snipe_users(previous=[]):
         'limit': 100,
         'offset': len(previous)
     }
-    logging.debug('The payload for the snipe users GET is {}'.format(payload))
+    logging.debug('The payload for the Snipe-IT users GET is {}'.format(payload))
     response = requests.get(user_id_url, headers=snipeheaders, params=payload, hooks={'response': request_handler})
     response_json = response.json()
     current = response_json['rows']
@@ -317,7 +338,7 @@ def get_snipe_users(previous=[]):
     else:
         return current
 
-# Function to search snipe for a user
+# Function to search Snipe-IT for a user
 def get_snipe_user_id(username):
     if username == '':
         return "NotFound"
@@ -338,7 +359,7 @@ def get_snipe_user_id(username):
         'sort':'username',
         'order':'asc'
     }
-    logging.debug('The payload for the snipe user search is: {}'.format(payload))
+    logging.debug('The payload for the Snipe-IT user search is: {}'.format(payload))
     response = requests.get(user_id_url, headers=snipeheaders, params=payload, verify=user_args.do_not_verify_ssl, hooks={'response': request_handler})
     try:
         return response.json()['rows'][0]['id']
@@ -375,10 +396,10 @@ def create_snipe_asset(payload):
         logging.error('Asset creation failed for asset {} with error {}'.format(payload['name'],response.text))
         return 'ERROR', response
 
-# Function that updates a snipe asset with a JSON payload
+# Function that updates a Snipe-IT asset with a JSON payload
 def update_snipe_asset(snipe_id, payload):
     api_url = '{}/api/v1/hardware/{}'.format(snipe_base, snipe_id)
-    logging.debug('The payload for the snipe update is: {}'.format(payload))
+    logging.debug('The payload for the Snipe-IT update is: {}'.format(payload))
     response = requests.patch(api_url, headers=snipeheaders, json=payload, verify=user_args.do_not_verify_ssl, hooks={'response': request_handler})
     # Verify that the payload updated properly.
     goodupdate = True
@@ -405,13 +426,13 @@ def update_snipe_asset(snipe_id, payload):
         logging.error('Whoops. Got an error status code while updating ID {}: {} - {}'.format(snipe_id, response.status_code, response.content))
         return False
 
-# Function that checks in an asset in snipe
+# Function that checks in an asset in Snipe-IT
 def checkin_snipe_asset(asset_id):
     api_url = '{}/api/v1/hardware/{}/checkin'.format(snipe_base, asset_id)
     payload = {
         'note':'Checked in by kandji2snipe'
     }
-    logging.debug('The payload for the snipe checkin is: {}'.format(payload))
+    logging.debug('The payload for the Snipe-IT checkin is: {}'.format(payload))
     response = requests.post(api_url, headers=snipeheaders, json=payload, verify=user_args.do_not_verify_ssl, hooks={'response': request_handler})
     logging.debug('The response from Snipe-IT is: {}'.format(response.json()))
     if response.status_code == 200:
@@ -420,7 +441,7 @@ def checkin_snipe_asset(asset_id):
     else:
         return response
 
-# Function that checks out an asset in snipe
+# Function that checks out an asset in Snipe-IT
 def checkout_snipe_asset(user, asset_id, checked_out_user=None):
     logging.debug('Asset {} is being checked out to {}'.format(user, asset_id))
     user_id = get_snipe_user_id(user)
@@ -492,7 +513,7 @@ logging.info("Finished running our tests.")
 
 ### Get Started ###
 # Get a list of known models from Snipe-IT
-logging.info("Getting a list of computer models that snipe knows about.")
+logging.info("Getting a list of computer models that Snipe-IT knows about.")
 snipemodels = get_snipe_models()
 logging.debug("Parsing the {} model results for models with model numbers.".format(len(snipemodels['rows'])))
 modelnumbers = {}
@@ -579,7 +600,7 @@ for kandji_device_type in kandji_device_types:
         # Check that the model number exists in snipe, if not create it.
         if kandji_device_type == 'mac':
             if kandji['hardware_overview']['model_identifier'] not in modelnumbers:
-                logging.info("Could not find a model ID in snipe for: {}".format(kandji['general']['model']))
+                logging.info("Could not find a model ID in Snipe-IT for: {}".format(kandji['general']['model']))
                 newmodel = {"category_id":config['snipe-it']['mac_model_category_id'],"manufacturer_id":apple_manufacturer_id,"name": kandji['general']['model'],"model_number":kandji['hardware_overview']['model_identifier']}
                 if 'computer_custom_fieldset_id' in config['snipe-it']:
                     fieldset_split = config['snipe-it']['computer_custom_fieldset_id']
@@ -587,7 +608,7 @@ for kandji_device_type in kandji_device_types:
                 create_snipe_model(newmodel)
         elif kandji_device_type == 'iphone':
             if kandji['general']['model'] not in modelnumbers:
-                logging.info("Could not find a model ID in snipe for: {}".format(kandji['general']['model']))
+                logging.info("Could not find a model ID in Snipe-IT for: {}".format(kandji['general']['model']))
                 newmodel = {"category_id":config['snipe-it']['iphone_model_category_id'],"manufacturer_id":apple_manufacturer_id,"name": kandji['general']['model'],"model_number":kandji['general']['model']}
                 if 'mobile_custom_fieldset_id' in config['snipe-it']:
                     fieldset_split = config['snipe-it']['mobile_custom_fieldset_id']
@@ -595,7 +616,7 @@ for kandji_device_type in kandji_device_types:
                 create_snipe_model(newmodel)
         elif kandji_device_type == 'ipad':
             if kandji['general']['model'] not in modelnumbers:
-                logging.info("Could not find a model ID in snipe for: {}".format(kandji['general']['model']))
+                logging.info("Could not find a model ID in Snipe-IT for: {}".format(kandji['general']['model']))
                 newmodel = {"category_id":config['snipe-it']['ipad_model_category_id'],"manufacturer_id":apple_manufacturer_id,"name": kandji['general']['model'],"model_number":kandji['general']['model']}
                 if 'mobile_custom_fieldset_id' in config['snipe-it']:
                     fieldset_split = config['snipe-it']['mobile_custom_fieldset_id']
@@ -603,7 +624,7 @@ for kandji_device_type in kandji_device_types:
                 create_snipe_model(newmodel)
         elif kandji_device_type == 'appletv':
             if kandji['general']['model'] not in modelnumbers:
-                logging.info("Could not find a model ID in snipe for: {}".format(kandji['general']['model']))
+                logging.info("Could not find a model ID in Snipe-IT for: {}".format(kandji['general']['model']))
                 newmodel = {"category_id":config['snipe-it']['appletv_model_category_id'],"manufacturer_id":apple_manufacturer_id,"name": kandji['general']['model'],"model_number":kandji['general']['model']}
                 if 'mobile_custom_fieldset_id' in config['snipe-it']:
                     fieldset_split = config['snipe-it']['mobile_custom_fieldset_id']
@@ -616,7 +637,7 @@ for kandji_device_type in kandji_device_types:
 
         # Create a new asset if there's no match:
         if snipe == 'NoMatch':
-            logging.info("Creating a new asset in snipe for Kandji ID {} - {}".format(kandji['general']['device_id'], kandji['general']['device_name']))
+            logging.info("Creating a new asset in Snipe-IT for Kandji ID {} - {}".format(kandji['general']['device_id'], kandji['general']['device_name']))
             # This section checks to see if the asset tag was already put into Kandji, if not it creates one with with Kandji's ID.
             if kandji['general']['asset_tag'] == '':
                 kandji_asset_tag = None
@@ -693,10 +714,18 @@ for kandji_device_type in kandji_device_types:
             # Only update if Kandji has more recent info.
             snipe_id = snipe['rows'][0]['id']
             snipe_time = snipe['rows'][0]['updated_at']['datetime']
-            if kandji_device_type == 'mac':
-                kandji_time = kandji['kandji_agent']['last_check_in']
-            elif kandji_device_type == 'iphone' or kandji_device_type == 'ipad' or kandji_device_type == 'appletv':
-                kandji_time = kandji['mdm']['last_check_in']
+            kandji_device_activity = get_kandji_asset_activity_date(kandji['general']['device_id'])
+            kandji_time = kandji_device_activity['activity']['results'][-1]['created_at']
+
+
+######
+# Preserving first version of device check in time
+#
+#            if kandji_device_type == 'mac':
+#                kandji_time = kandji['kandji_agent']['last_check_in']
+#            elif kandji_device_type == 'iphone' or kandji_device_type == 'ipad' or kandji_device_type == 'appletv':
+#                kandji_time = kandji['mdm']['last_check_in']
+######
 
             # Check to see that the Kandji record is newer than the previous Snipe-IT update, or if it is a new record in Snipe-IT
             if ( kandji_time > snipe_time ) or ( user_args.force ):
