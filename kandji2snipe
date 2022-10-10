@@ -774,7 +774,6 @@ for kandji_device_type in kandji_device_types:
                     update_snipe_asset(snipe_id, updates)
 
                 if ((user_args.users or user_args.users_inverse) and (snipe['rows'][0]['assigned_to'] == None) == user_args.users) or user_args.users_force:
-
                     if snipe['rows'][0]['status_label']['status_meta'] in ('deployable', 'deployed'):
                         if not kandji['general']['assigned_user']:
                             logging.info("No user is assigned to {} in Kandji, not checking it out.".format(kandji['general']['device_name']))
