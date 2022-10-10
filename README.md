@@ -5,37 +5,27 @@ usage: kandji2snipe [-h] [-v] [--dryrun] [-d] [--do_not_verify_ssl] [-r] [--no_s
                     [-u | -ui | -uf] [--mac | --iphone | --ipad | --appletv]
                     
 
-optional arguments:
--h, --help              show this help message and exit
--v, --verbose           Sets the logging level to INFO and gives you a better
-                        idea of what the script is doing.
---auto_incrementing     You can use this if you have auto-incrementing 
-                        enabled in your Snipe-IT instance to utilize that 
-                        instead of adding the script's default the asset tags.
---dryrun                This checks your config and tries to contact both the
-                        Kandji and Snipe-IT instances, but exits before
-                        updating or syncing any assets.
--d, --debug             Sets logging to include additional DEBUG messages.
---do_not_update_kandji  Does not update Kandji with the asset tags stored in
-                        Snipe.
---do_not_verify_ssl     Skips SSL verification for all requests. Helpful when
-                        you use self-signed certificate.
--r, --ratelimited       Puts a half second delay between Snipe-IT API calls to
-                        adhere to the standard 120/minute rate limit
--f, --force             Updates the Snipe-IT asset with information from Kandji
-                        every time, despite what the timestamps indicate.
--u, --users             Checks out the item to the current user in Kandji if
-                        it's not already deployed
--ui, --users_inverse    Checks out the item to the current user in Kandji if
-                        it's already deployed
--uf, --users_force      Checks out the item to the user specified in Kandji no
-                        matter what
--uns, --users_no_search Doesn't search for any users if the specified fields
-                        in Kandji and Snipe don't match. (case insensitive)
---mac                   Runs against Mac computers only
---iphone                Runs against iPhones only
---ipad                  Runs against iPads only
---appletv               Runs against Apple TVs only
+  -h, --help            show this help message and exit
+  -v, --verbose         Sets the logging level to INFO and gives you a better idea of what the script is doing.
+  --auto_incrementing   You can use this if you have auto-incrementing enabled in your Snipe-IT instance to utilize that instead of adding the Kandji ID for the asset tag.
+  --dryrun              This checks your config and tries to contact both the Kandji and Snipe-IT instances, but exits before updating or syncing any assets.
+  -d, --debug           Sets logging to include additional DEBUG messages.
+  --do_not_update_kandji
+                        Does not update Kandji with the asset tags stored in Snipe-IT.
+  --do_not_verify_ssl   Skips SSL verification for all requests. Helpful when you use self-signed certificate.
+  -r, --ratelimited     Puts a half second delay between Snipe-IT API calls to adhere to the standard 120/minute rate limit
+  -f, --force           Updates the Snipe-IT asset with information from Kandji every time, despite what the timestamps indicate.
+  --version             Prints the version and exits.
+  -u, --users           Checks out the item to the current user in Kandji if it's not already deployed
+  -ui, --users_inverse  Checks out the item to the current user in Kandji if it's already deployed
+  -uf, --users_force    Checks out the item to the user specified in Kandji no matter what
+  -uns, --users_no_search
+                        Doesn't search for any users if the specified fields in Kandji and Snipe-IT don't match. (case insensitive)
+  --mac                 Runs against Kandji Mac computers only.
+  --iphone              Runs against Kandji iPhones only.
+  --ipad                Runs against Kandji iPads only.
+  --appletv             Runs against Kandji Apple TVs only.
+
 ```
 
 
