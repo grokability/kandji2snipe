@@ -90,7 +90,7 @@ else:
 
 # Notify users if we're doing a dry run.
 if user_args.dryrun:
-    print("Dryrun: Starting kandji2snipe with a dry run where no assets will be updated.")
+    print("Dry Run: Starting kandji2snipe with a dry run where no assets will be updated.")
 
 # Find a valid settings.conf file.
 logging.info("Searching for a valid settings.conf file.")
@@ -556,7 +556,6 @@ else:
     for kandji_device_type in kandji_device_types:
         TotalNumber += len(kandji_device_types[kandji_device_type])
 
-
 # Make sure we have a good list.
 if TotalNumber != None:
     logging.info('Received a list of Kandji assets that had {} entries.'.format(TotalNumber))
@@ -564,9 +563,9 @@ else:
     logging.error("We were not able to retreive a list of assets from your Kandji instance. It's likely that your settings, or credentials are incorrect. Check your settings.conf and verify you can make API calls outside of this system with the credentials found in your settings.conf")
     raise SystemExit("Unable to get Kandji devices.")
 
-# After this point we start editing data, so quit if this is a dryrun
+# After this point we start editing data, so quit if this is a dry run
 if user_args.dryrun:
-    raise SystemExit("Dryrun: Complete.")
+    raise SystemExit("Dry Run: Complete.")
 
 # From this point on, we're editing data.
 logging.info('Starting to Update Inventory')
@@ -587,17 +586,12 @@ for kandji_device_type in kandji_device_types:
             continue
     for kandji_asset in kandji_device_types[kandji_device_type]:
         CurrentNumber += 1
-        logging.info("Processing entry {} out of {} - Device ID: {} - Device Name: {}".format(CurrentNumber, TotalNumber, kandji_asset['device_id'], kandji_asset['device_name']))
-
+        logging.info("Processing entry {} out of {} - Device Name: {} - Device ID: {}".format(CurrentNumber, TotalNumber, kandji_asset['device_name'], kandji_asset['device_id']))
 
         # Search through the list by device_id for all asset information
-        if kandji_device_type == 'mac':
-            kandji = search_kandji_asset(kandji_asset['device_id'])
-        elif kandji_device_type == 'iphone' or kandji_device_type == 'ipad' or kandji_device_type == 'appletv':
-            kandji = search_kandji_asset(kandji_asset['device_id'])
+        kandji = search_kandji_asset(kandji_asset['device_id'])
         if kandji == None:
             continue
-
 
         # Check that the model number exists in snipe, if not create it.
         if kandji_device_type == 'mac':
@@ -671,9 +665,6 @@ for kandji_device_type in kandji_device_types:
             elif kandji_device_type == 'mac':
                 logging.debug("Payload is being made.")
                 newasset = {'asset_tag': kandji_asset_tag,'model_id': modelnumbers['{}'.format(kandji['hardware_overview']['model_identifier'])], 'name': kandji['general']['device_name'], 'status_id': defaultStatus,'serial': kandji['hardware_overview']['serial_number']}
-            if kandji['hardware_overview']['serial_number'] == 'Not Available':
-                logging.warning("The serial number is not available in Kandji. Since there's no serial number yet, we'll skip it for now.")
-                continue
             else:
                 for snipekey in config['{}-api-mapping'.format(kandji_device_type)]:
                     kandjisplit = config['{}-api-mapping'.format(kandji_device_type)][snipekey].split()
