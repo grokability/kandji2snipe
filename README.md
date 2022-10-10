@@ -5,37 +5,27 @@ usage: kandji2snipe [-h] [-v] [--dryrun] [-d] [--do_not_verify_ssl] [-r] [--no_s
                     [-u | -ui | -uf] [--mac | --iphone | --ipad | --appletv]
                     
 
-optional arguments:
--h, --help              show this help message and exit
--v, --verbose           Sets the logging level to INFO and gives you a better
-                        idea of what the script is doing.
---auto_incrementing     You can use this if you have auto-incrementing 
-                        enabled in your Snipe-IT instance to utilize that 
-                        instead of adding the script's default the asset tags.
---dryrun                This checks your config and tries to contact both the
-                        Kandji and Snipe-IT instances, but exits before
-                        updating or syncing any assets.
--d, --debug             Sets logging to include additional DEBUG messages.
---do_not_update_kandji  Does not update Kandji with the asset tags stored in
-                        Snipe.
---do_not_verify_ssl     Skips SSL verification for all requests. Helpful when
-                        you use self-signed certificate.
--r, --ratelimited       Puts a half second delay between Snipe-IT API calls to
-                        adhere to the standard 120/minute rate limit
--f, --force             Updates the Snipe-IT asset with information from Kandji
-                        every time, despite what the timestamps indicate.
--u, --users             Checks out the item to the current user in Kandji if
-                        it's not already deployed
--ui, --users_inverse    Checks out the item to the current user in Kandji if
-                        it's already deployed
--uf, --users_force      Checks out the item to the user specified in Kandji no
-                        matter what
--uns, --users_no_search Doesn't search for any users if the specified fields
-                        in Kandji and Snipe don't match. (case insensitive)
---mac                   Runs against Mac computers only
---iphone                Runs against iPhones only
---ipad                  Runs against iPads only
---appletv               Runs against Apple TVs only
+  -h, --help            show this help message and exit
+  -v, --verbose         Sets the logging level to INFO and gives you a better idea of what the script is doing.
+  --auto_incrementing   You can use this if you have auto-incrementing enabled in your Snipe-IT instance to utilize that instead of adding the Kandji ID for the asset tag.
+  --dryrun              This checks your config and tries to contact both the Kandji and Snipe-IT instances, but exits before updating or syncing any assets.
+  -d, --debug           Sets logging to include additional DEBUG messages.
+  --do_not_update_kandji
+                        Does not update Kandji with the asset tags stored in Snipe-IT.
+  --do_not_verify_ssl   Skips SSL verification for all requests. Helpful when you use self-signed certificate.
+  -r, --ratelimited     Puts a half second delay between Snipe-IT API calls to adhere to the standard 120/minute rate limit
+  -f, --force           Updates the Snipe-IT asset with information from Kandji every time, despite what the timestamps indicate.
+  --version             Prints the version and exits.
+  -u, --users           Checks out the item to the current user in Kandji if it's not already deployed
+  -ui, --users_inverse  Checks out the item to the current user in Kandji if it's already deployed
+  -uf, --users_force    Checks out the item to the user specified in Kandji no matter what
+  -uns, --users_no_search
+                        Doesn't search for any users if the specified fields in Kandji and Snipe-IT don't match. (case insensitive)
+  --mac                 Runs against Kandji Mac computers only.
+  --iphone              Runs against Kandji iPhones only.
+  --ipad                Runs against Kandji iPads only.
+  --appletv             Runs against Kandji Apple TVs only.
+
 ```
 
 
@@ -44,27 +34,23 @@ This tool will sync assets between a Kandji instance and a Snipe-IT instance. Th
 
 >Note that iPhones, iPads, and Apple TVs currently match based on the model name, rather than model identifier. All other behaviors are the same as the Macs.
 
-When an asset is first created, it will fill out only the most basic information. When the asset already exists in your Snipe-IT inventory, the tool will sync the information you specify in the settings.conf file and make sure that the asset_tag field in Kandji matches the asset tag in Snipe-IT, where Snipe-IT's info is considered the authority.
+When an asset is first created, it will fill out only the most basic information. When the asset already exists in your Snipe-IT inventory, the tool will sync the information you specify in the settings.conf file and make sure that the asset tag field in Kandji matches the asset tag in Snipe-IT, where Snipe-IT's info is considered the authority.
 
 > Because it determines whether Kandji or Snipe has the most recently updated record, there is the potential to have blank data in Kandji overwrite good data in Snipe (ex. purchase date).
 
-Lastly, if the asset_tag field is blank in Kandji when it is being created in Snipe-IT, then the tool will look for a 4 or more digit number in the computer name. If it fails to find one, it will use the below formulas as the asset tag in Snipe-IT. This way, you can easily filter this out and run scripts against it to correct in the future.
-#### Default Asset Tag Formulas
-- **Macs**: kandji-{serial_number}
-- **iPhones & iPads**: kandji-m-{serial_number}
-- **Apple TVs**: kandji-atv-{serial_number}
+Lastly, if the asset tag field is blank in Kandji when the record is being created in Snipe-IT, the script will create an asset tag with KANDJI-<SERIAL NUMNER> unless you enable custom patterns in your settings.conf file.
 
 ## Requirements:
 
-- Python3 is installed on your system with the requests, json, time, and configparser python libs installed.
+- Python3 is installed on your system with the requests, json, time, configparser, argparse, logging, datetime, and pytz python libs installed.
 - Network access to both your Kandji and Snipe-IT instances.
-- A [Kandji API key](https://support.kandji.io/support/solutions/articles/72000560412-kandji-api) with the following permissions:
+- A [Kandji API token](https://support.kandji.io/support/solutions/articles/72000560412-kandji-api) with the following permissions:
   - Devices
     - Updated a Device
     - Device details
-    - Device List
+    - Device list
     - Device ID
-- A [Snipe-IT API key](https://snipe-it.readme.io/reference#generating-api-tokens) for a user that has edit/create permissions for assets and models. 
+- A [Snipe-IT API token](https://snipe-it.readme.io/reference#generating-api-tokens) for a user that has edit/create permissions for assets and models. 
 
 ## Installation:
 
@@ -109,15 +95,24 @@ Note: do not add `""` or `''` around any values.
 
 Check out the [settings.conf.example](https://github.com/grokability/jamf2snipe/blob/main/settings.conf.example) file for the full documentation
 
-- `url`: https://*your_snipe_instance*.com
-- `apikey`: API key generated via [these steps](https://snipe-it.readme.io/reference#generating-api-tokens).
+- `url`: https://your_snipe_instance.com
+- `apikey`: snipe-api-bearer-token-here
 - `manufacturer_id`: The manufacturer database field id for the Apple in your Snipe-IT instance. You will probably have to create a Manufacturer in Snipe-IT and note its ID.
 - `defaultStatus`: The status database field id to assign to any assets created in Snipe-IT from Kandji. Usually you will want to pick a status like "Ready To Deploy" - look up its ID in Snipe-IT and put the ID here.
+- `time_zone`: The time zone that your Snipe-IT instance is set to.  Refer to APP_TIMEZONE='<timezone>' in your Snipe-IT .env file.
 - `mac_model_category_id`: The ID of the category you want to assign to Mac computers. You will have to create this in Snipe-IT and note the Category ID
 - `iphone_model_category_id`: The ID of the category you want to assign to iPhones. You will have to create this in Snipe-IT and note the Category ID
 - `ipad_model_category_id`: The ID of the category you want to assign to iPads. You will have to create this in Snipe-IT and note the Category ID
 - `appletv_model_category_id`: The ID of the category you want to assign to Apple TVs. You will have to create this in Snipe-IT and note the Category ID
+    
+**[asset-tag]**
+- `use_custom_pattern`: Set to Yes to set your own patterns, if commented/No, devices with no asset tag will default to KANDJI-<SIERAL NUMBER>
+- `pattern_mac`: The pattern to use when creating new Macs in Snipe-IT that do not have an asset tag in Kandji.
+- `pattern_iphone`: The pattern to use when creating new iPhones in Snipe-IT that do not have an asset tag in Kandji.
+- `pattern_ipad`: The pattern to use when creating new iPads in Snipe-IT that do not have an asset tag in Kandji.
+- `pattern_appletv`: The pattern to use when creating new Apple TVs in Snipe-IT that do not have an asset tag in Kandji.
 
+  
 ### API Mapping (****TO CLEAN UP****)
 
 To get the database fields for Snipe-IT Custom Fields, go to Custom Fields, scroll down past Fieldsets to Custom Fields, click the column selection and button and select the unchecked 'DB Field' checkbox. Copy and paste the DB Field name for the Snipe under api-mapping in settings.conf.
