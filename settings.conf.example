@@ -12,7 +12,6 @@ mac_model_category_id = 5
 iphone_model_category_id = 6
 ipad_model_category_id = 7
 appletv_model_category_id = 8
-#asset_tag = hardware_overview serial_number 
 
 [asset-tag]
 # If an asset tag does not exist in Kandji and Snipe-IT, the script will create one
@@ -31,7 +30,6 @@ pattern_iphone = IPHONE- hardware_overview serial_number
 pattern_ipad = IPAD- hardware_overview serial_number
 pattern_appletv = ATV- hardware_overview serial_number
 
-
 [mac-api-mapping]
 name = general device_name
 _snipeit_mac_address_1 = network mac_address
@@ -44,6 +42,3 @@ name = general device_name
 
 [appletv-api-mapping]
 name = general device_name
-
-[user-mapping] # The field from Kandji that you want to search Snipe-IT with
-kandji_api_field = general assigned_user email
