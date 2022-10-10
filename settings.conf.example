@@ -5,41 +5,45 @@ apikey = kandji-api-bearer-token-here
 [snipe-it]
 url = https://your_snipe_instance.com
 apikey = snipe-api-bearer-token-here
+time_zone = America/Los_Angeles
 manufacturer_id = 1
 defaultStatus = 2
 mac_model_category_id = 5
 iphone_model_category_id = 6
 ipad_model_category_id = 7
 appletv_model_category_id = 8
-# Asset Tag is not required, uncomment line 19 to customize
-# If not specified, the default formulas are...
-# Macs - kandji-{serial_number}
-# iPhones & iPads - kandji-m-{serial_number}
-# Apple TVs - kandji-atv-{serial_number}
-#asset_tag = general serial_number 
+#asset_tag = hardware_overview serial_number 
 
-[computers-api-mapping]
-name = general name
-_snipeit_mac_address_1 = general mac_address
+[asset-tag]
+# If an asset tag does not exist in Kandji and Snipe-IT, the script will create one
+# using the pattern KANDJI-<SERIAL NUMBER>.  To use the custom patterns, uncomment
+# the custom_pattern line below and adjust the patterns as desired.
+# use_custom_pattern = yes
 
-[mobile_devices-api-mapping]
-_snipeit_imei_4	= network imei
-name = general name
+# This is only required if use_custom_pattern = yes
+# Patterns must contain a prefix and variable.
+# Examples of Kandji device attribute variables:
+# Serial Number = hardware_overview serial_number
+# Device ID = general device_id 
+# Device Name = general device_name
+pattern_mac = MAC- hardware_overview serial_number
+pattern_iphone = IPHONE- hardware_overview serial_number
+pattern_ipad = IPAD- hardware_overview serial_number
+pattern_appletv = ATV- hardware_overview serial_number
+
 
 [mac-api-mapping]
-name = general name
-_snipeit_mac_address_1 = general mac_address
+name = general device_name
+_snipeit_mac_address_1 = network mac_address
 
 [iphone-api-mapping]
-_snipeit_imei_4	= network imei
-name = general name
+name = general device_name
 
 [ipad-api-mapping]
-_snipeit_imei_4	= network imei
-name = general name
+name = general device_name
 
 [appletv-api-mapping]
-name = general name
+name = general device_name
 
 [user-mapping] # The field from Kandji that you want to search Snipe-IT with
-jamf_api_field = location username
+kandji_api_field = general assigned_user email
