@@ -604,32 +604,32 @@ for kandji_device_type in kandji_device_types:
             if kandji['hardware_overview']['model_identifier'] not in modelnumbers:
                 logging.info("Could not find a model ID in Snipe-IT for: {}".format(kandji['general']['model']))
                 newmodel = {"category_id":config['snipe-it']['mac_model_category_id'],"manufacturer_id":apple_manufacturer_id,"name": kandji['general']['model'],"model_number":kandji['hardware_overview']['model_identifier']}
-                if 'computer_custom_fieldset_id' in config['snipe-it']:
-                    fieldset_split = config['snipe-it']['computer_custom_fieldset_id']
+                if 'mac_custom_fieldset_id' in config['snipe-it']:
+                    fieldset_split = config['snipe-it']['mac_custom_fieldset_id']
                     newmodel['fieldset_id'] = fieldset_split
                 create_snipe_model(newmodel)
         elif kandji_device_type == 'iphone':
             if kandji['general']['model'] not in modelnumbers:
                 logging.info("Could not find a model ID in Snipe-IT for: {}".format(kandji['general']['model']))
                 newmodel = {"category_id":config['snipe-it']['iphone_model_category_id'],"manufacturer_id":apple_manufacturer_id,"name": kandji['general']['model'],"model_number":kandji['general']['model']}
-                if 'mobile_custom_fieldset_id' in config['snipe-it']:
-                    fieldset_split = config['snipe-it']['mobile_custom_fieldset_id']
+                if 'iphone_custom_fieldset_id' in config['snipe-it']:
+                    fieldset_split = config['snipe-it']['iphone_custom_fieldset_id']
                     newmodel['fieldset_id'] = fieldset_split
                 create_snipe_model(newmodel)
         elif kandji_device_type == 'ipad':
             if kandji['general']['model'] not in modelnumbers:
                 logging.info("Could not find a model ID in Snipe-IT for: {}".format(kandji['general']['model']))
                 newmodel = {"category_id":config['snipe-it']['ipad_model_category_id'],"manufacturer_id":apple_manufacturer_id,"name": kandji['general']['model'],"model_number":kandji['general']['model']}
-                if 'mobile_custom_fieldset_id' in config['snipe-it']:
-                    fieldset_split = config['snipe-it']['mobile_custom_fieldset_id']
+                if 'ipad_custom_fieldset_id' in config['snipe-it']:
+                    fieldset_split = config['snipe-it']['ipad_custom_fieldset_id']
                     newmodel['fieldset_id'] = fieldset_split
                 create_snipe_model(newmodel)
         elif kandji_device_type == 'appletv':
             if kandji['general']['model'] not in modelnumbers:
                 logging.info("Could not find a model ID in Snipe-IT for: {}".format(kandji['general']['model']))
                 newmodel = {"category_id":config['snipe-it']['appletv_model_category_id'],"manufacturer_id":apple_manufacturer_id,"name": kandji['general']['model'],"model_number":kandji['general']['model']}
-                if 'mobile_custom_fieldset_id' in config['snipe-it']:
-                    fieldset_split = config['snipe-it']['mobile_custom_fieldset_id']
+                if 'appletv_custom_fieldset_id' in config['snipe-it']:
+                    fieldset_split = config['snipe-it']['appletv_custom_fieldset_id']
                     newmodel['fieldset_id'] = fieldset_split
                 create_snipe_model(newmodel)
 
@@ -671,6 +671,9 @@ for kandji_device_type in kandji_device_types:
             elif kandji_device_type == 'mac':
                 logging.debug("Payload is being made.")
                 newasset = {'asset_tag': kandji_asset_tag,'model_id': modelnumbers['{}'.format(kandji['hardware_overview']['model_identifier'])], 'name': kandji['general']['device_name'], 'status_id': defaultStatus,'serial': kandji['hardware_overview']['serial_number']}
+            if kandji['hardware_overview']['serial_number'] == 'Not Available':
+                logging.warning("The serial number is not available in Kandji. Since there's no serial number yet, we'll skip it for now.")
+                continue
             else:
                 for snipekey in config['{}-api-mapping'.format(kandji_device_type)]:
                     kandjisplit = config['{}-api-mapping'.format(kandji_device_type)][snipekey].split()
