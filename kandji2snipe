@@ -55,6 +55,8 @@ import time
 import configparser
 import argparse
 import logging
+from datetime import datetime
+import pytz
 
 # Set us up for using runtime arguments by defining them.
 runtimeargs = argparse.ArgumentParser()
@@ -638,33 +640,36 @@ for kandji_device_type in kandji_device_types:
         # Create a new asset if there's no match:
         if snipe == 'NoMatch':
             logging.info("Creating a new asset in Snipe-IT for Kandji ID {} - {}".format(kandji['general']['device_id'], kandji['general']['device_name']))
-            # This section checks to see if the asset tag was already put into Kandji, if not it creates one with with Kandji's ID.
+            # This section checks to see if an asset tag exists in Kandji, if not it creates one.
             if kandji['general']['asset_tag'] == '':
-                kandji_asset_tag = None
-                logging.debug('No asset tag found in Kandji, checking settings.conf for alternative specified field.')
-                if 'asset_tag' in config['snipe-it']:
-                    tag_split = config['snipe-it']['asset_tag'].split()
-                    try:
-                        kandji_asset_tag = kandji['{}'.format(tag_split[0])]['{}'.format(tag_split[1])]
-                    except:
-                        raise SystemError('No such attribute {} in the Kandji payload. Please check your settings.conf file'.format(tag_split))
-                if kandji_asset_tag == None or kandji_asset_tag == '':
-                    logging.debug('No custom configuration found in settings.conf for asset tag name upon asset creation.')
-                    if kandji_device_type == 'iphone' or kandji_device_type == 'ipad' :
-                        kandji_asset_tag = 'kandji-m-{}'.format(kandji['hardware_overview']['serial_number'])
+                logging.debug('No asset tag found in Kandji, checking settings.conf for custom asset tag patterns.')
+                # Check for custom patterns and use them if enabled, otherwise use the default pattern.
+                if config['asset-tag']['use_custom_pattern'] == 'yes':
+                    logging.debug('Custom asset tag patterns found.')
+                    if kandji_device_type == 'mac':
+                        tag_split = config['asset-tag']['pattern_mac'].split()
+                        kandji_asset_tag = tag_split[0]+kandji['{}'.format(tag_split[1])]['{}'.format(tag_split[2])]
+                    elif kandji_device_type == 'iphone':
+                        tag_split = config['asset-tag']['pattern_iphone'].split()
+                        kandji_asset_tag = tag_split[0]+kandji['{}'.format(tag_split[1])]['{}'.format(tag_split[2])]
+                    elif kandji_device_type == 'ipad':
+                        tag_split = config['asset-tag']['pattern_ipad'].split()
+                        kandji_asset_tag = tag_split[0]+kandji['{}'.format(tag_split[1])]['{}'.format(tag_split[2])]
                     elif kandji_device_type == 'appletv':
-                        kandji_asset_tag = 'kandji-atv-{}'.format(kandji['hardware_overview']['serial_number'])
-                    elif kandji_device_type == 'mac':
-                        kandji_asset_tag = 'kandji-{}'.format(kandji['hardware_overview']['serial_number'])
+                        tag_split = config['asset-tag']['pattern_appletv'].split()
+                        kandji_asset_tag = tag_split[0]+kandji['{}'.format(tag_split[1])]['{}'.format(tag_split[2])]
+                else:
+                    logging.debug('No custom asset tag patterns found in settings.conf, using default.')
+                    kandji_asset_tag = 'KANDJI-{}'.format(kandji['hardware_overview']['serial_number'])
             else:
                 kandji_asset_tag = kandji['general']['asset_tag']
                 logging.info("Asset tag found in Kandji, setting it to: {}".format(kandji_asset_tag))
             # Create the payload
             if kandji_device_type == 'iphone' or kandji_device_type == 'ipad' or kandji_device_type == 'appletv':
-                logging.debug("Payload is being made for a mobile device")
+                logging.debug("Payload is being made.")
                 newasset = {'asset_tag': kandji_asset_tag, 'model_id': modelnumbers['{}'.format(kandji['general']['model'])], 'name': kandji['general']['device_name'], 'status_id': defaultStatus,'serial': kandji['hardware_overview']['serial_number']}
             elif kandji_device_type == 'mac':
-                logging.debug("Payload is being made for a computer")
+                logging.debug("Payload is being made.")
                 newasset = {'asset_tag': kandji_asset_tag,'model_id': modelnumbers['{}'.format(kandji['hardware_overview']['model_identifier'])], 'name': kandji['general']['device_name'], 'status_id': defaultStatus,'serial': kandji['hardware_overview']['serial_number']}
             if kandji['hardware_overview']['serial_number'] == 'Not Available':
                 logging.warning("The serial number is not available in Kandji. Since there's no serial number yet, we'll skip it for now.")
@@ -715,17 +720,10 @@ for kandji_device_type in kandji_device_types:
             snipe_id = snipe['rows'][0]['id']
             snipe_time = snipe['rows'][0]['updated_at']['datetime']
             kandji_device_activity = get_kandji_asset_activity_date(kandji['general']['device_id'])
-            kandji_time = kandji_device_activity['activity']['results'][-1]['created_at']
-
-
-######
-# Preserving first version of device check in time
-#
-#            if kandji_device_type == 'mac':
-#                kandji_time = kandji['kandji_agent']['last_check_in']
-#            elif kandji_device_type == 'iphone' or kandji_device_type == 'ipad' or kandji_device_type == 'appletv':
-#                kandji_time = kandji['mdm']['last_check_in']
-######
+            kandji_time_conversion = datetime.strptime(kandji_device_activity['activity']['results'][-1]['created_at'], '%Y-%m-%dT%H:%M:%S.%fZ')
+            kandji_time_conversion = pytz.timezone('UTC').localize(kandji_time_conversion)
+            kandji_time_conversion = kandji_time_conversion.astimezone(pytz.timezone(config['snipe-it']['time_zone']))
+            kandji_time = kandji_time_conversion.strftime('%Y-%m-%d %H:%M:%S')
 
             # Check to see that the Kandji record is newer than the previous Snipe-IT update, or if it is a new record in Snipe-IT
             if ( kandji_time > snipe_time ) or ( user_args.force ):
