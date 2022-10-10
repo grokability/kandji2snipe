@@ -21,8 +21,8 @@ appletv_model_category_id = 8
 
 [asset-tag]
 # If an asset tag does not exist in Kandji and Snipe-IT, the script will create one
-# using the pattern KANDJI-<SERIAL NUMBER>.  To use the custom patterns, uncomment
-# the custom_pattern line below and adjust the patterns as desired.
+# using the pattern KANDJI-<SERIAL NUMBER>.  To use the custom patterns, change the
+# line below to "use_custom_pattern = yes" and adjust the patterns as desired.
 use_custom_pattern = no
 
 # This is only required if use_custom_pattern = yes
