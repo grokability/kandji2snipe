@@ -30,15 +30,11 @@ usage: kandji2snipe [-h] [-v] [--dryrun] [-d] [--do_not_verify_ssl] [-r] [--no_s
 
 
 ## Overview:
-This tool will sync assets between a Kandji instance and a Snipe-IT instance. The tool searches for assets based on the serial number, not the existing asset tag. If assets exist in Kandji and are not in Snipe-IT, the tool will create an asset and try to match it with an existing Snipe-IT model. This match is based on the Mac's model identifier (ex. MacBookAir7,1) being entered as the model number in Snipe-IT, rather than the model name. If a matching model isn't found, it will create one.
-
->Note that iPhones, iPads, and Apple TVs currently match based on the model name, rather than model identifier. All other behaviors are the same as the Macs.
+This tool will sync assets between a Kandji instance and a Snipe-IT instance. The tool searches for assets based on the serial number, not the existing asset tag. If assets exist in Kandji and are not in Snipe-IT, the tool will create an asset and try to match it with an existing Snipe-IT model. This match is based on the deveice's model identifier (ex. MacBookAir7,1) being entered as the model number in Snipe-IT, rather than the model name. If a matching model isn't found, it will create one.
 
 When an asset is first created, it will fill out only the most basic information. When the asset already exists in your Snipe-IT inventory, the tool will sync the information you specify in the settings.conf file and make sure that the asset tag field in Kandji matches the asset tag in Snipe-IT, where Snipe-IT's info is considered the authority.
 
-> Because it determines whether Kandji or Snipe has the most recently updated record, there is the potential to have blank data in Kandji overwrite good data in Snipe (ex. purchase date).
-
-Lastly, if the asset tag field is blank in Kandji when the record is being created in Snipe-IT, the script will create an asset tag with KANDJI-<SERIAL NUMNER> unless you enable custom patterns in your settings.conf file.
+If the asset tag field is blank in Kandji when the record is being created in Snipe-IT, the script will create an asset tag with KANDJI-<SERIAL NUMBER> unless you enable custom patterns in your settings.conf file.
 
 ## Requirements:
 
