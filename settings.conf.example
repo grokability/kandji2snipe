@@ -42,12 +42,16 @@ pattern_appletv = ATV- hardware_overview serial_number
 _snipeit_mac_address_1 = network mac_address
 _snipeit_blueprint_2 = general blueprint_name
 _snipeit_filevault_enabled_3 = filevault filevault_enabled
+_snipeit_kandji_device_id_4 = general device_id
 
 [iphone-api-mapping]
 _snipeit_blueprint_2 = general blueprint_name
+_snipeit_kandji_device_id_4 = general device_id
 
 [ipad-api-mapping]
 _snipeit_blueprint_2 = general blueprint_name
+_snipeit_kandji_device_id_4 = general device_id
 
 [appletv-api-mapping]
 _snipeit_blueprint_2 = general blueprint_name
+_snipeit_kandji_device_id_4 = general device_id
