@@ -673,12 +673,7 @@ for kandji_device_type in kandji_device_types:
                             if i == 0:
                                 kandji_value = kandji[item]
                             else:
-                                if kandjisplit[0] == 'extension_attributes':
-                                    for attribute in kandji_value:
-                                        if attribute['id'] == item:
-                                            kandji_value = attribute['value']
-                                else:
-                                    kandji_value = kandji_value[item]
+                                 kandji_value = kandji_value[item]
                         newasset[snipekey] = kandji_value
                     except KeyError:
                         continue
