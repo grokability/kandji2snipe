@@ -140,20 +140,7 @@ kandjiheaders = {'Authorization': 'Bearer {}'.format(kandji_apiKey),'Accept': 'a
 snipeheaders = {'Authorization': 'Bearer {}'.format(snipe_apiKey),'Accept': 'application/json','Content-Type':'application/json'}
 logging.debug('Request headers for Kandji will be: {}\nRequest headers for Snipe-IT will be: {}'.format(kandjiheaders, snipeheaders))
 
-# Check the config file for correct headers
-
-# Do some tests to see if the user has updated their settings.conf file
-# SETTINGS_CORRECT = True
-#if not 'user-mapping' in config and (user_args.users or user_args.users_force or user_args.users_inverse):
-#    logging.error("""You've chosen to check out assets to users in some capacity using a cmdline switch, but not specified how you want to
-#    search Snipe-IT for the users from Kandji. Make sure you have a 'user-mapping' section in your settings.conf file.""")
-#    SETTINGS_CORRECT = False
-#
-#if not SETTINGS_CORRECT:
-#    raise SystemExit
-
-
-#Check the config file for valid kandji subsets. This is based off the Kandji API and if it's not right we can't map fields over to Snipe-IT properly.
+# Check the config file for valid kandji subsets. This is based off the Kandji API and if it's not right we can't map fields over to Snipe-IT properly.
 logging.debug("Checking the settings.conf file for valid Kandji subsets of the Kandji API so mapping can occur properly.")
 for key in config['mac-api-mapping']:
     kandjisplit = config['mac-api-mapping'][key].split()
