@@ -184,7 +184,7 @@ def request_handler(r, *args, **kwargs):
 # Function to make the API call to get device records from Kandji 
 def get_kandji_devices(platform):
     api_url = '{0}/api/v1/devices?platform={1}'.format(kandji_base, platform)
-    logging.debug('Calling for computers in Kandji against: {}\n The username, passwords, and headers for this GET requestcan be found near the beginning of the output.'.format(api_url))
+    logging.debug('Calling for computers in Kandji against: {}\n The username, passwords, and headers for this GET request can be found near the beginning of the output.'.format(api_url))
     response = requests.get(api_url, headers=kandjiheaders, verify=user_args.do_not_verify_ssl, hooks={'response': request_handler})
     if response.status_code == 200:
         logging.debug("Got back a valid 200 response code.")
