@@ -411,8 +411,6 @@ def update_snipe_asset(snipe_id, payload):
             goodupdate = False
         else:
             for key in payload:
-                if key == 'purchase_date':
-                    payload[key] = payload[key] + " 00:00:00"
                 if payload[key] == '':
                     payload[key] = None
                 if jsonresponse['payload'][key] != payload[key]:
@@ -763,7 +761,7 @@ for kandji_device_type in kandji_device_types:
                         if not kandji['general']['assigned_user']:
                             logging.info("No user is assigned to {} in Kandji, not checking it out.".format(kandji['general']['device_name']))
                             continue
-                        logging.info('Checking out new item {} to user {}'.format(kandji['general']['device_name'], kandji['general']['assigned_user']['email']))
+                        logging.info('Checking out {} to user {}'.format(kandji['general']['device_name'], kandji['general']['assigned_user']['email']))
                         checkout_snipe_asset(kandji['general']['assigned_user']['email'], snipe_id, snipe['rows'][0]['assigned_to'])
                     else:
                         logging.info("Can't checkout {} since the status isn't set to deployable".format(kandji['general']['device_name']))
