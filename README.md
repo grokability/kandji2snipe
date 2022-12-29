@@ -17,8 +17,6 @@ usage: kandji2snipe [-h] [-v] [--dryrun] [-d] [--do_not_verify_ssl] [-r] [--no_s
   -f, --force           Updates the Snipe-IT asset with information from Kandji every time, despite what the timestamps indicate.
   --version             Prints the version and exits.
   -u, --users           Checks out the item to the current user in Kandji if it's not already deployed
-  -ui, --users_inverse  Checks out the item to the current user in Kandji if it's already deployed
-  -uf, --users_force    Checks out the item to the user specified in Kandji no matter what
   -uns, --users_no_search
                         Doesn't search for any users if the specified fields in Kandji and Snipe-IT don't match. (case insensitive)
   --mac                 Runs against Kandji Mac computers only.

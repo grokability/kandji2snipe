@@ -437,24 +437,21 @@ def checkin_snipe_asset(asset_id):
         return response
 
 # Function that checks out an asset in Snipe-IT
-def checkout_snipe_asset(user, asset_id, checked_out_user=None):
-    logging.debug('Asset {} is being checked out to {}'.format(user, asset_id))
+def checkout_snipe_asset(user, asset_id, asset_name, checked_out_user=None):
+    logging.debug('Checking out {} (ID: {}) to {}'.format(asset_name,asset_id,user))
     user_id = get_snipe_user_id(user)
     if user_id == 'NotFound':
         logging.info("User {} not found in Snipe-IT, skipping check out".format(user))
         return "NotFound"
     if checked_out_user == None:
-        logging.info("Not checked out, checking out to {}".format(user))
+        logging.info("Not checked out, checking out {} (ID: {}) to {}.".format(asset_name,asset_id,user))
     elif checked_out_user == "NewAsset":
         logging.info("First time this asset will be checked out, checking out to {}".format(user))
-    elif checked_out_user['id'] == user_id:
-        logging.info(str(asset_id) + " already checked out to user " + user)
-        return 'CheckedOut'
     else:
-        logging.info("Checking in {} to check it out to {}".format(asset_id,user))
+        logging.info("Checking in {} (ID: {}) to check it out to {}".format(asset_name,asset_id,user))
         checkin_snipe_asset(asset_id)
     api_url = '{}/api/v1/hardware/{}/checkout'.format(snipe_base, asset_id)
-    logging.info("Checking out {} to check it out to {}".format(asset_id,user))
+    logging.info("Checking out {} (ID: {}) to {}.".format(asset_name,asset_id,user))
     payload = {
         'checkout_to_type':'user',
         'assigned_user':user_id,
@@ -759,15 +756,17 @@ for kandji_device_type in kandji_device_types:
                         if snipe['rows'][0]['assigned_to'] and not kandji['general']['assigned_user']:
                             logging.info("No user is assigned to {} in Kandji, checking it in.".format(kandji['general']['device_name']))
                             checkin_snipe_asset(snipe_id)
-                        if not kandji['general']['assigned_user']:
-                            logging.info("No user is assigned to {} in Kandji, not checking it out.".format(kandji['general']['device_name']))
+                        elif not kandji['general']['assigned_user']:
+                            logging.info("No user is assigned to {} in Kandji, skipping check out.".format(kandji['general']['device_name']))
                             continue
-                        if snipe['rows'][0]['assigned_to']['email'] == kandji['general']['assigned_user']['email']:
-                            logging.info("{} is already checked out to {}, not checking it out.".format(kandji['general']['device_name'],snipe['rows'][0]['assigned_to']['email']))
-                            continue
-                        if snipe['rows'][0]['assigned_to'] == None or snipe['rows'][0]['assigned_to']['email'] != kandji['general']['assigned_user']['email']:
+                        elif snipe['rows'][0]['assigned_to'] == None or snipe['rows'][0]['assigned_to']['email'] != kandji['general']['assigned_user']['email']:
                             logging.info('Checking out {} to user {}'.format(kandji['general']['device_name'], kandji['general']['assigned_user']['email']))
-                            checkout_snipe_asset(kandji['general']['assigned_user']['email'], snipe_id, snipe['rows'][0]['assigned_to'])
+                            checkout_snipe_asset(kandji['general']['assigned_user']['email'], snipe_id, kandji['general']['device_name'], snipe['rows'][0]['assigned_to'])
+                        elif snipe['rows'][0]['assigned_to']['email'] == kandji['general']['assigned_user']['email']:
+                            logging.info("{} is already checked out to {}, skipping check out.".format(kandji['general']['device_name'],snipe['rows'][0]['assigned_to']['email']))
+                            continue
+                        else:
+                            logging.info("Failed checking out {} to {}.".format(kandji['general']['device_name'],snipe['rows'][0]['assigned_to']['email']))
                     else:
                         logging.info("Can't checkout {} since the status isn't set to deployable".format(kandji['general']['device_name']))
 
