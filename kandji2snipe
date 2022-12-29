@@ -71,9 +71,7 @@ runtimeargs.add_argument("-r", "--ratelimited", help="Puts a half second delay b
 runtimeargs.add_argument("-f", "--force", help="Updates the Snipe-IT asset with information from Kandji every time, despite what the timestamps indicate.", action="store_true")
 runtimeargs.add_argument("--version", help="Prints the version and exits.", action="store_true")
 user_opts = runtimeargs.add_mutually_exclusive_group()
-user_opts.add_argument("-u", "--users", help="Checks out the item to the current user in Kandji if it's not already deployed", action="store_true")
-user_opts.add_argument("-ui", "--users_inverse", help="Checks out the item to the current user in Kandji if it's already deployed", action="store_true")
-user_opts.add_argument("-uf", "--users_force", help="Checks out the item to the user specified in Kandji no matter what", action="store_true")
+user_opts.add_argument("-u", "--users", help="Checks in/out assets based on the user assignment in Kandji.", action="store_true")
 runtimeargs.add_argument("-uns", "--users_no_search", help="Doesn't search for any users if the specified fields in Kandji and Snipe-IT don't match. (case insensitive)", action="store_true")
 type_opts = runtimeargs.add_mutually_exclusive_group()
 type_opts.add_argument("--mac", help="Runs against Kandji Mac computers only.", action="store_true")
@@ -523,7 +521,7 @@ logging.info("Our list of models has {} entries.".format(len(modelnumbers)))
 logging.debug("Here's the list of the {} models and their id's that we were able to collect:\n{}".format(len(modelnumbers), modelnumbers))
 
 # Get a list of users from Snipe-IT if the user has specified they're syncing users
-if user_args.users or user_args.users_force or user_args.users_inverse:
+if user_args.users:
     snipe_users = get_snipe_users()
 
 # Get the device_ids of all active assets.
@@ -681,7 +679,7 @@ for kandji_device_type in kandji_device_types:
                 new_snipe_asset = create_snipe_asset(newasset)
                 if new_snipe_asset[0] != "AssetCreated":
                     continue
-                if user_args.users or user_args.users_force or user_args.users_inverse:
+                if user_args.users:
                     if not kandji['general']['assigned_user']:
                         logging.info("No user is assigned to {} in Kandji, not checking it out.".format(kandji['general']['device_name']))
                         continue
@@ -756,13 +754,20 @@ for kandji_device_type in kandji_device_types:
                 if updates:
                     update_snipe_asset(snipe_id, updates)
 
-                if ((user_args.users or user_args.users_inverse) and (snipe['rows'][0]['assigned_to'] == None) == user_args.users) or user_args.users_force:
+                if user_args.users:
                     if snipe['rows'][0]['status_label']['status_meta'] in ('deployable', 'deployed'):
+                        if snipe['rows'][0]['assigned_to'] and not kandji['general']['assigned_user']:
+                            logging.info("No user is assigned to {} in Kandji, checking it in.".format(kandji['general']['device_name']))
+                            checkin_snipe_asset(snipe_id)
                         if not kandji['general']['assigned_user']:
                             logging.info("No user is assigned to {} in Kandji, not checking it out.".format(kandji['general']['device_name']))
                             continue
-                        logging.info('Checking out {} to user {}'.format(kandji['general']['device_name'], kandji['general']['assigned_user']['email']))
-                        checkout_snipe_asset(kandji['general']['assigned_user']['email'], snipe_id, snipe['rows'][0]['assigned_to'])
+                        if snipe['rows'][0]['assigned_to']['email'] == kandji['general']['assigned_user']['email']:
+                            logging.info("{} is already checked out to {}, not checking it out.".format(kandji['general']['device_name'],snipe['rows'][0]['assigned_to']['email']))
+                            continue
+                        if snipe['rows'][0]['assigned_to'] == None or snipe['rows'][0]['assigned_to']['email'] != kandji['general']['assigned_user']['email']:
+                            logging.info('Checking out {} to user {}'.format(kandji['general']['device_name'], kandji['general']['assigned_user']['email']))
+                            checkout_snipe_asset(kandji['general']['assigned_user']['email'], snipe_id, snipe['rows'][0]['assigned_to'])
                     else:
                         logging.info("Can't checkout {} since the status isn't set to deployable".format(kandji['general']['device_name']))
 
