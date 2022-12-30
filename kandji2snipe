@@ -47,17 +47,35 @@ validsubset = [
         "security_information"
 ]
 
-version = "0.0.7"
+version = "0.0.9"
 
-# Import all the things
+# Standard Library Imports
 import json
-import requests
 import time
 import configparser
 import argparse
 import logging
+import sys
 from datetime import datetime
-import pytz
+
+# 3rd Party Imports
+try:
+    import pytz
+except ImportError as import_error:
+    print(import_error)
+    sys.exit(
+        "Looks like you need to install the pytz module. Open a Terminal and run  "
+        "\033[1m python3 -m pip install pytz\033[0m."
+    )
+
+try:
+    import requests
+except ImportError as import_error:
+    print(import_error)
+    sys.exit(
+        "Looks like you need to install the requests module. Open a Terminal and run "
+        "\033[1m python3 -m pip install requests\033[0m."
+    )
 
 # Set us up for using runtime arguments by defining them.
 runtimeargs = argparse.ArgumentParser()
@@ -113,32 +131,34 @@ if 'snipe-it' not in set(config):
     logging.error("No valid settings.conf was found. We'll need to quit while you figure out where the settings are at. You can check the README for valid locations.")
     raise SystemExit("Error: No valid settings.conf - Exiting.")
 
-logging.info("Great, we found a settings file. Let's get started by parsing all of the settings.")
+logging.info("Great, we found a settings.conf file. Let's get started by parsing all of the settings.")
 
 # Set some Variables from the settings.conf:
-# This is the address, cname, or FQDN for your Kandji instance.
+
+# Kandji base URL and API token.
 kandji_base = config['kandji']['url']
 logging.info("The configured Kandji base url is: {}".format(kandji_base))
-kandji_apiKey = config['kandji']['apikey']
-logging.debug("The API key you provided for Kandji is: {}".format(kandji_apiKey))
+kandji_apitoken = config['kandji']['apitoken']
+logging.debug("The API token you provided for Kandji is: {}".format(kandji_apitoken))
 
-# This is the address, cname, or FQDN for your Snipe-IT instance.
+# Snipe-IT base URL, API key, default status, and Apple manufacturer ID
+
 snipe_base = config['snipe-it']['url']
 logging.info("The configured Snipe-IT base url is: {}".format(snipe_base))
-snipe_apiKey = config['snipe-it']['apikey']
-logging.debug("The API key you provided for Snipe-IT is: {}".format(snipe_apiKey))
+snipe_apikey = config['snipe-it']['apikey']
+logging.debug("The API key you provided for Snipe-IT is: {}".format(snipe_apikey))
 defaultStatus = config['snipe-it']['defaultStatus']
-logging.info("The default status we'll be setting updated computer to is: {}".format(defaultStatus))
+logging.info("The default status we'll be setting updated device to is: {}".format(defaultStatus))
 apple_manufacturer_id = config['snipe-it']['manufacturer_id']
 logging.info("The Apple manufacturer ID in Snipe-IT is set to: {}".format(apple_manufacturer_id))
 
 # Headers for the API calls
 logging.info("Creating the headers we'll need for API calls")
-kandjiheaders = {'Authorization': 'Bearer {}'.format(kandji_apiKey),'Accept': 'application/json','Content-Type':'application/json'}
-snipeheaders = {'Authorization': 'Bearer {}'.format(snipe_apiKey),'Accept': 'application/json','Content-Type':'application/json'}
+kandjiheaders = {'Authorization': 'Bearer {}'.format(kandji_apitoken),'Accept': 'application/json','Content-Type':'application/json;charset=utf-8','Cache-Control': 'no-cache'}
+snipeheaders = {'Authorization': 'Bearer {}'.format(snipe_apikey),'Accept': 'application/json','Content-Type':'application/json'}
 logging.debug('Request headers for Kandji will be: {}\nRequest headers for Snipe-IT will be: {}'.format(kandjiheaders, snipeheaders))
 
-# Check the config file for valid kandji subsets. This is based off the Kandji API and if it's not right we can't map fields over to Snipe-IT properly.
+# Check the config file for valid Kandji subsets.
 logging.debug("Checking the settings.conf file for valid Kandji subsets of the Kandji API so mapping can occur properly.")
 for key in config['mac-api-mapping']:
     kandjisplit = config['mac-api-mapping'][key].split()
@@ -183,7 +203,7 @@ def request_handler(r, *args, **kwargs):
 def get_kandji_devices(platform):
     api_url = '{0}/api/v1/devices?platform={1}'.format(kandji_base, platform)
     logging.debug('Calling for devices in Kandji against: {}\n The token and headers for this GET request can be found near the beginning of the output.'.format(api_url))
-    response = requests.get(api_url, headers=kandjiheaders, verify=user_args.do_not_verify_ssl, hooks={'response': request_handler})
+    response = requests.get(api_url, headers=kandjiheaders, hooks={'response': request_handler})
     if response.status_code == 200:
         logging.debug("Got back a valid 200 response code.")
         return response.json()
@@ -200,9 +220,9 @@ def get_kandji_devices(platform):
         return None
 
 # Function to lookup a Kandji asset by device_id.
-def search_kandji_asset(kandji_id):
+def get_kandji_device_details(kandji_id):
     api_url = "{}/api/v1/devices/{}/details".format(kandji_base, kandji_id)
-    response = requests.get(api_url, headers=kandjiheaders, verify=user_args.do_not_verify_ssl, hooks={'response': request_handler})
+    response = requests.get(api_url, headers=kandjiheaders, hooks={'response': request_handler})
     if response.status_code == 200:
         logging.debug("Got back a valid 200 response code.")
         jsonresponse = response.json()
@@ -213,7 +233,7 @@ def search_kandji_asset(kandji_id):
         logging.warning('Kandji Ratelimit exceeded: pausing ')
         time.sleep(75)
         logging.info("Finished waiting. Retrying lookup...")
-        newresponse = search_kandji_asset(kandji_id)
+        newresponse = get_kandji_device_details(kandji_id)
         return newresponse
     else:
         logging.warning('Kandji responded with error code:{} when we tried to look up id: {}'.format(response, kandji_id))
@@ -221,9 +241,9 @@ def search_kandji_asset(kandji_id):
         return None
 
 # Function to lookup last activity date and time for a Kandji asset.
-def get_kandji_asset_activity_date(kandji_id):
+def get_kandji_device_activity_date(kandji_id):
     api_url = "{}/api/v1/devices/{}/activity".format(kandji_base, kandji_id)
-    response = requests.get(api_url, headers=kandjiheaders, verify=user_args.do_not_verify_ssl, hooks={'response': request_handler})
+    response = requests.get(api_url, headers=kandjiheaders, hooks={'response': request_handler})
     if response.status_code == 200:
         logging.debug("Got back a valid 200 response code.")
         jsonresponse = response.json()
@@ -234,7 +254,7 @@ def get_kandji_asset_activity_date(kandji_id):
         logging.warning('Kandji Ratelimit exceeded: pausing ')
         time.sleep(75)
         logging.info("Finished waiting. Retrying lookup...")
-        newresponse = search_kandji_asset(kandji_id)
+        newresponse = get_kandji_device_details(kandji_id)
         return newresponse
     else:
         logging.warning('Kandji responded with error code:{} when we tried to look up id: {}'.format(response, kandji_id))
@@ -245,8 +265,8 @@ def get_kandji_asset_activity_date(kandji_id):
 def update_kandji_asset_tag(kandji_id, asset_tag):
     api_url = "{}/api/v1/devices/{}".format(kandji_base, kandji_id)
     payload = '{{"asset_tag": "{}"}}'.format(asset_tag)
-    logging.debug('Making Get request against: {}\nPayload for the PATCH request is: {}\nThe username, password, and headers can be found near the beginning of the output.'.format(api_url, payload))
-    response = requests.patch(api_url, data=payload, headers=kandjiheaders, verify=user_args.do_not_verify_ssl, hooks={'response': request_handler})
+    logging.debug('Making PATCH request against: {}\nPayload for the PATCH request is: {}\nThe token and headers can be found near the beginning of the output.'.format(api_url, payload))
+    response = requests.patch(api_url, data=payload, headers=kandjiheaders, hooks={'response': request_handler})
     if response.status_code == 201:
         logging.debug("Got a 201 response. Returning: True")
         return True
@@ -579,11 +599,11 @@ for kandji_device_type in kandji_device_types:
         logging.info("Processing entry {} out of {} - Device Name: {} - Device ID: {}".format(CurrentNumber, TotalNumber, kandji_asset['device_name'], kandji_asset['device_id']))
 
         # Search through the list by device_id for all asset information
-        kandji = search_kandji_asset(kandji_asset['device_id'])
+        kandji = get_kandji_device_details(kandji_asset['device_id'])
         if kandji == None:
             continue
 
-        # Check that the model number exists in snipe, if not create it.
+        # Check that the model number exists in Snipe-IT, if not create it.
         if kandji_device_type == 'mac':
             if kandji['hardware_overview']['model_identifier'] not in modelnumbers:
                 logging.info("Could not find a model ID in Snipe-IT for: {}".format(kandji['general']['model']))
@@ -693,7 +713,7 @@ for kandji_device_type in kandji_device_types:
             # Only update if Kandji has more recent info.
             snipe_id = snipe['rows'][0]['id']
             snipe_time = snipe['rows'][0]['updated_at']['datetime']
-            kandji_device_activity = get_kandji_asset_activity_date(kandji['general']['device_id'])
+            kandji_device_activity = get_kandji_device_activity_date(kandji['general']['device_id'])
             kandji_time_conversion = datetime.strptime(kandji_device_activity['activity']['results'][-1]['created_at'], '%Y-%m-%dT%H:%M:%S.%fZ')
             kandji_time_conversion = pytz.timezone('UTC').localize(kandji_time_conversion)
             kandji_time_conversion = kandji_time_conversion.astimezone(pytz.timezone(config['snipe-it']['time_zone']))
