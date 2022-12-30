@@ -1,10 +1,10 @@
 [kandji]
 url = https://TENANTNAME.clients.us-1.kandji.io
-apikey = kandji-api-bearer-token-here
+apitoken = kandji-api-bearer-token-here
 
 [snipe-it]
 url = https://your_snipe_instance.com
-apikey = snipe-api-bearer-token-here
+apikey = snipe-api-key-here
 # time_zone should match APP_TIMEZONE="timezone" in your Snipe-IT .env file 
 time_zone = America/Los_Angeles
 manufacturer_id = 1
