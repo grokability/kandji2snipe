@@ -182,13 +182,13 @@ def request_handler(r, *args, **kwargs):
 # Function to make the API call to get device records from Kandji 
 def get_kandji_devices(platform):
     api_url = '{0}/api/v1/devices?platform={1}'.format(kandji_base, platform)
-    logging.debug('Calling for computers in Kandji against: {}\n The username, passwords, and headers for this GET request can be found near the beginning of the output.'.format(api_url))
+    logging.debug('Calling for devices in Kandji against: {}\n The token and headers for this GET request can be found near the beginning of the output.'.format(api_url))
     response = requests.get(api_url, headers=kandjiheaders, verify=user_args.do_not_verify_ssl, hooks={'response': request_handler})
     if response.status_code == 200:
         logging.debug("Got back a valid 200 response code.")
         return response.json()
     elif b'policies.ratelimit.QuotaViolation' in response.content:
-        logging.info('Kandji responded with error code: {} - Policy Ratelimit Quota Violation - when we tried to get a list of computers Waiting a bit to retry the lookup.'.format(response))
+        logging.info('Kandji responded with error code: {} - Policy Ratelimit Quota Violation - when we tried to get a list of devices Waiting a bit to retry the lookup.'.format(response))
         logging.warning('Kandji Ratelimit exceeded: pausing ')
         time.sleep(75)
         logging.info("Finished waiting. Retrying lookup...")
@@ -241,7 +241,7 @@ def get_kandji_asset_activity_date(kandji_id):
         logging.debug("Returning a null value for the function.")
         return None
 
-# Function to update the asset tag of computers in Kandji with an number passed from Snipe-IT.
+# Function to update the asset tag of devices in Kandji with an number passed from Snipe-IT.
 def update_kandji_asset_tag(kandji_id, asset_tag):
     api_url = "{}/api/v1/devices/{}".format(kandji_base, kandji_id)
     payload = '{{"asset_tag": "{}"}}'.format(asset_tag)
@@ -505,7 +505,7 @@ logging.info("Finished running our tests.")
 
 ### Get Started ###
 # Get a list of known models from Snipe-IT
-logging.info("Getting a list of computer models that Snipe-IT knows about.")
+logging.info("Getting a list of device models that Snipe-IT knows about.")
 snipemodels = get_snipe_models()
 logging.debug("Parsing the {} model results for models with model numbers.".format(len(snipemodels['rows'])))
 modelnumbers = {}
