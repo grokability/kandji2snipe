@@ -103,7 +103,7 @@ user_args = runtimeargs.parse_args()
 # Print version and exit
 if user_args.version:
     print('kandji2snipe v'+version)
-    raise SystemExit
+    sys.exit()
 
 # Notify users they're going to get a wall of text in verbose mode.
 if user_args.verbose:
@@ -131,7 +131,7 @@ if 'snipe-it' not in set(config):
 if 'snipe-it' not in set(config):
     logging.debug("No valid config found in current folder.")
     logging.error("No valid settings.conf was found. We'll need to quit while you figure out where the settings are at. You can check the README for valid locations.")
-    raise SystemExit("Error: No valid settings.conf - Exiting.")
+    sys.exit("Error: No valid settings.conf - Exiting.")
 
 logging.info("Great, we found a settings.conf file. Let's get started by parsing all of the settings.")
 
@@ -169,7 +169,7 @@ for key in config['mac-api-mapping']:
         continue
     else:
         logging.error("Found invalid subset: {} in the settings.conf file.\nThis is not in the acceptable list of subsets. Check your settings.conf\n Valid subsets are: {}".format(kandjisplit[0], ', '.join(validsubset)))
-        raise SystemExit("Invalid Subset found in settings.conf")
+        sys.exit("Invalid Subset found in settings.conf")
 
 ### Setup Some Functions ###
 snipe_api_count = 0
@@ -198,7 +198,7 @@ def request_handler(r, *args, **kwargs):
         logging.debug("Made {} requests to Snipe-IT in {} seconds, with a request being sent every {} seconds".format(snipe_api_count, time_elapsed, snipe_api_rate))
     if '"messages":429' in r.text:
         logging.error(r.content)
-        raise SystemExit("We've been rate limited. Use option -r to respect the built in Snipe-IT API rate limit of 120/minute.")
+        sys.exit("We've been rate limited. Use option -r to respect the built in Snipe-IT API rate limit of 120/minute.")
     return r
 
 def kandji_error_handling(resp, resp_code, err_msg):
@@ -232,7 +232,7 @@ def kandji_error_handling(resp, resp_code, err_msg):
             "\t\t\t enrolled in Kandji. This would prevent the MDM command from being\n"
             "\t\t\t sent successfully.\n"
         )
-#        sys.exit()
+        sys.exit()
     # 429
     elif resp_code == requests.codes["too_many_requests"]:
         logging.error(f"{err_msg}")
@@ -342,7 +342,6 @@ def update_kandji_asset_tag(kandji_id, asset_tag):
     response = kandji_api(method="PATCH", endpoint=f"/api/v1/devices/{kandji_id}/",params=params)
     return response
 
-
 # Function to lookup a Snipe-IT asset by serial number.
 def search_snipe_asset(serial):
     api_url = '{}/api/v1/hardware/byserial/{}'.format(snipe_base, serial)
@@ -387,13 +386,13 @@ def get_snipe_models():
                     return newjsonresponse
                 else:
                     logging.error("We couldn't seem to get all of the model numbers")
-                    raise SystemExit("Unable to get all model objects from Snipe-IT instanace")
+                    sys.exit("Unable to get all model objects from Snipe-IT instanace")
             else:
                 logging.error('When we tried to retreive a list of models, Snipe-IT responded with error status code:{} - {}'.format(response.status_code, response.content))
-                raise SystemExit("Snipe-IT models API endpoint failed.")
+                sys.exit("Snipe-IT models API endpoint failed.")
     else:
         logging.error('When we tried to retreive a list of models, Snipe-IT responded with error status code:{} - {}'.format(response.status_code, response.content))
-        raise SystemExit("Snipe-IT models API endpoint failed.")
+        sys.exit("Snipe-IT models API endpoint failed.")
 
 # Recursive function returns all users in a Snipe-IT Instance, 100 at a time.
 def get_snipe_users(previous=[]):
@@ -575,7 +574,7 @@ else:
 
 # Exit if you can't contact Snipe-IT or Kandji
 if ( KANDJI_UP == False ) or ( SNIPE_UP == False ):
-    raise SystemExit("Error: Host could not be contacted.")
+    sys.exit("Error: Host could not be contacted.")
 
 # Test that we can actually connect with the API keys.
 ##TODO Write some more tests here. ha!
@@ -629,12 +628,12 @@ else:
 if TotalNumber != None:
     logging.info('Received a list of Kandji assets that had {} entries.'.format(TotalNumber))
 else:
-    logging.error("We were not able to retreive a list of assets from your Kandji instance. It's likely that your settings, or credentials are incorrect. Check your settings.conf and verify you can make API calls outside of this system with the credentials found in your settings.conf")
-    raise SystemExit("Unable to get Kandji devices.")
+    logging.error("We were not able to retreive a list of assets from your Kandji instance. It's likely that your settings or credentials are incorrect. Check your settings.conf and verify you can make API calls outside of this system with the credentials found in your settings.conf")
+    sys.exit("Unable to get Kandji devices.")
 
 # After this point we start editing data, so quit if this is a dry run
 if user_args.dryrun:
-    raise SystemExit("Dry Run: Complete.")
+    sys.exit("Dry Run: Complete.")
 
 # From this point on, we're editing data.
 logging.info('Starting to Update Inventory')
