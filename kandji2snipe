@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# kandji2snipe - Inventory Import
+# kandji2snipe - Asset Sync
 #
 # ABOUT:
 #   This program is designed to import inventory information from a Kandji instance
@@ -13,24 +13,24 @@
 #   MIT
 #
 # CONFIGURATION:
-#   These settings are commonly found in the settings.conf file.
+#   kandji2snipe settings are set in the settings.conf file. For more detais please see the README at
+#   https://github.com/briangoldstein/kandji2snipe
 #
 #   This setting sets the Snipe-IT asset status when creating a new asset. By default it's set to 4 (Pending).
 #   defaultStatus = 4
 #
-#   Using the [<platform>-api-mapping] sections, you can map Snipe-IT hardware values to Kandji values 
+#   Using the [<platform>-api-mapping] sections, you can map Snipe-IT hardware values to Kandji device values 
 #   The default example associates information that exists by default in both Snipe-IT and Kandji. 
 #   The Key value is the exact name of the Snipe-IT key name.
-#   Value1 is the "Subset" name, and the Value2 is the Kandji key name.
-#   Note that MAC Address are a custom value in Snipe-IT by default and you can use it as an example.
+#   Value1 is the array name, and the Value2 is the key name.
 #
-#   [api-mapping]
+#   [<platform>-api-mapping]
 #       name = general name
 #       _snipeit_mac_address_1 = general mac_address
-#       _snipeit_custom_name_1234567890 = subset kandji_key
+#       _snipeit_custom_name_1234567890 = kandji_array kandji_key
 #
-#   A list of valid subsets are:
-validsubset = [
+#   A list of valid array options are:
+validarrays = [
         "general",
         "mdm",
         "activation_lock",
@@ -47,7 +47,7 @@ validsubset = [
         "security_information"
 ]
 
-version = "0.0.9"
+version = "0.1.5"
 
 # Standard Library Imports
 import json
@@ -77,14 +77,16 @@ except ImportError as import_error:
         "\033[1m python3 -m pip install requests\033[0m."
     )
 
+from requests.adapters import HTTPAdapter
+
 # Set us up for using runtime arguments by defining them.
 runtimeargs = argparse.ArgumentParser()
 runtimeargs.add_argument("-v", "--verbose", help="Sets the logging level to INFO and gives you a better idea of what the script is doing.", action="store_true")
-runtimeargs.add_argument("--auto_incrementing", help="You can use this if you have auto-incrementing enabled in your Snipe-IT instance to utilize that instead of adding the Kandji ID for the asset tag.", action="store_true")
+runtimeargs.add_argument("--auto_incrementing", help="You can use this if you have auto-incrementing enabled in your Snipe-IT instance to utilize that instead of using KANDJI-<SERIAL NUMBER> for the asset tag.", action="store_true")
 runtimeargs.add_argument("--dryrun", help="This checks your config and tries to contact both the Kandji and Snipe-IT instances, but exits before updating or syncing any assets.", action="store_true")
 runtimeargs.add_argument("-d", "--debug", help="Sets logging to include additional DEBUG messages.", action="store_true")
 runtimeargs.add_argument("--do_not_update_kandji", help="Does not update Kandji with the asset tags stored in Snipe-IT.", action="store_false")
-runtimeargs.add_argument('--do_not_verify_ssl', help="Skips SSL verification for all requests. Helpful when you use self-signed certificate.", action="store_false")
+runtimeargs.add_argument('--do_not_verify_ssl', help="Skips SSL verification for all Snipe-IT requests. Helpful when you use self-signed certificate.", action="store_false")
 runtimeargs.add_argument("-r", "--ratelimited", help="Puts a half second delay between Snipe-IT API calls to adhere to the standard 120/minute rate limit", action="store_true")
 runtimeargs.add_argument("-f", "--force", help="Updates the Snipe-IT asset with information from Kandji every time, despite what the timestamps indicate.", action="store_true")
 runtimeargs.add_argument("--version", help="Prints the version and exits.", action="store_true")
@@ -101,7 +103,7 @@ user_args = runtimeargs.parse_args()
 # Print version and exit
 if user_args.version:
     print('kandji2snipe v'+version)
-    raise SystemExit
+    sys.exit()
 
 # Notify users they're going to get a wall of text in verbose mode.
 if user_args.verbose:
@@ -129,7 +131,7 @@ if 'snipe-it' not in set(config):
 if 'snipe-it' not in set(config):
     logging.debug("No valid config found in current folder.")
     logging.error("No valid settings.conf was found. We'll need to quit while you figure out where the settings are at. You can check the README for valid locations.")
-    raise SystemExit("Error: No valid settings.conf - Exiting.")
+    sys.exit("Error: No valid settings.conf - Exiting.")
 
 logging.info("Great, we found a settings.conf file. Let's get started by parsing all of the settings.")
 
@@ -162,12 +164,12 @@ logging.debug('Request headers for Kandji will be: {}\nRequest headers for Snipe
 logging.debug("Checking the settings.conf file for valid Kandji subsets of the Kandji API so mapping can occur properly.")
 for key in config['mac-api-mapping']:
     kandjisplit = config['mac-api-mapping'][key].split()
-    if kandjisplit[0] in validsubset:
+    if kandjisplit[0] in validarrays:
         logging.info('Found subset {}: Acceptable'.format(kandjisplit[0]))
         continue
     else:
-        logging.error("Found invalid subset: {} in the settings.conf file.\nThis is not in the acceptable list of subsets. Check your settings.conf\n Valid subsets are: {}".format(kandjisplit[0], ', '.join(validsubset)))
-        raise SystemExit("Invalid Subset found in settings.conf")
+        logging.error("Found invalid subset: {} in the settings.conf file.\nThis is not in the acceptable list of subsets. Check your settings.conf\n Valid subsets are: {}".format(kandjisplit[0], ', '.join(validarrays)))
+        sys.exit("Invalid Subset found in settings.conf")
 
 ### Setup Some Functions ###
 snipe_api_count = 0
@@ -196,93 +198,149 @@ def request_handler(r, *args, **kwargs):
         logging.debug("Made {} requests to Snipe-IT in {} seconds, with a request being sent every {} seconds".format(snipe_api_count, time_elapsed, snipe_api_rate))
     if '"messages":429' in r.text:
         logging.error(r.content)
-        raise SystemExit("We've been rate limited. Use option -r to respect the built in Snipe-IT API rate limit of 120/minute.")
+        sys.exit("We've been rate limited. Use option -r to respect the built in Snipe-IT API rate limit of 120/minute.")
     return r
 
-# Function to make the API call to get device records from Kandji 
-def get_kandji_devices(platform):
-    api_url = '{0}/api/v1/devices?platform={1}'.format(kandji_base, platform)
-    logging.debug('Calling for devices in Kandji against: {}\n The token and headers for this GET request can be found near the beginning of the output.'.format(api_url))
-    response = requests.get(api_url, headers=kandjiheaders, hooks={'response': request_handler})
-    if response.status_code == 200:
-        logging.debug("Got back a valid 200 response code.")
-        return response.json()
-    elif b'policies.ratelimit.QuotaViolation' in response.content:
-        logging.info('Kandji responded with error code: {} - Policy Ratelimit Quota Violation - when we tried to get a list of devices Waiting a bit to retry the lookup.'.format(response))
-        logging.warning('Kandji Ratelimit exceeded: pausing ')
-        time.sleep(75)
-        logging.info("Finished waiting. Retrying lookup...")
-        newresponse = get_kandji_devices()
-        return newresponse
+def kandji_error_handling(resp, resp_code, err_msg):
+    """Handle HTTP errors."""
+    # 400
+    if resp_code == requests.codes["bad_request"]:
+        logging.error(f"{err_msg}")
+        logging.error(f"\tResponse msg: {resp.text}\n")
+        sys.exit()
+    # 401
+    elif resp_code == requests.codes["unauthorized"]:
+        logging.error(f"{err_msg}")
+        logging.error(
+            "This error can occur if the token is incorrect, was revoked, the required "
+            "permissions are missing, or the token has expired."
+        )
+        sys.exit()
+    # 403
+    elif resp_code == requests.codes["forbidden"]:
+        logging.error(f"{err_msg}")
+        logging.error("The api key may be invalid or missing.")
+        sys.exit()
+    # 404
+    elif resp_code == requests.codes["not_found"]:
+        logging.error("\nWe cannot find the one that you are looking for...")
+        logging.error(f"\tError: {err_msg}")
+        logging.error(f"\tResponse msg: {resp}")
+        logging.error(
+            "\tPossible reason: If this is a device it could be because the device is "
+            "no longer\n"
+            "\t\t\t enrolled in Kandji. This would prevent the MDM command from being\n"
+            "\t\t\t sent successfully.\n"
+        )
+        sys.exit()
+    # 429
+    elif resp_code == requests.codes["too_many_requests"]:
+        logging.error(f"{err_msg}")
+        logging.error("You have reached the rate limit ...")
+        print("Try again later ...")
+        sys.exit()
+    # 500
+    elif resp_code == requests.codes["internal_server_error"]:
+        logging.error(f"{err_msg}")
+        logging.error("The service is having a problem...")
+        sys.exit()
+    # 503
+    elif resp_code == requests.codes["service_unavailable"]:
+        logging.error(f"{err_msg}")
+        logging.error("Unable to reach the service. Try again later...")
+        sys.exit()
     else:
-        logging.warning('Received an invalid status code when trying to retreive Kandji Device list:{} - {}'.format(response.status_code, response.content))
-        logging.debug("Returning a null value for the function.")
-        return None
+        logging.error("Something really bad must have happened...")
+        logging.error(err_msg)
+        sys.exit()
+
+def kandji_api(method, endpoint, params=None, payload=None):
+    """Make an API request and return data.
+    method   - an HTTP Method (GET, POST, PATCH, DELETE).
+    endpoint - the API URL endpoint to target.
+    params   - optional parameters can be passed as a dict.
+    payload  - optional payload is passed as a dict and used with PATCH and POST
+               methods.
+    Returns a JSON data object.
+    """
+    attom_adapter = HTTPAdapter(max_retries=3)
+    session = requests.Session()
+    session.mount(kandji_base, attom_adapter)
+
+    try:
+        response = session.request(
+            method,
+            kandji_base + endpoint,
+            data=payload,
+            headers=kandjiheaders,
+            params=params,
+            timeout=30,
+        )
+
+        # If a successful status code is returned (200 and 300 range)
+        if response:
+            try:
+                data = response.json()
+            except Exception:
+                data = response.text
+
+        # If the request is successful exceptions will not be raised
+        response.raise_for_status()
+
+    except requests.exceptions.RequestException as err:
+        kandji_error_handling(resp=response, resp_code=response.status_code, err_msg=err)
+        data = {"error": f"{response.status_code}", "api resp": f"{err}"}
+
+    return data
+
+# Function to get device records from Kandji 
+def get_kandji_devices(platform):
+    count = 0
+    # dict placeholder for params passed to api requests
+    params = {}
+    # limit - set the number of records to return per API call
+    limit = 300
+    # offset - set the starting point within a list of resources
+    offset = 0
+    # inventory
+    data = []
+
+    while True:
+        # update params
+        params.update(
+            {"platform": f"{platform}", "limit": f"{limit}", "offset": f"{offset}"}
+        )
+
+        # get devices
+        response = kandji_api(method="GET", endpoint="/api/v1/devices", params=params)
+        count += len(response)
+        offset += limit
+        if len(response) == 0:
+            break
+
+        # breakout the response then append to the data list
+        for record in response:
+            data.append(record)
+
+    return data
 
 # Function to lookup a Kandji asset by device_id.
 def get_kandji_device_details(kandji_id):
-    api_url = "{}/api/v1/devices/{}/details".format(kandji_base, kandji_id)
-    response = requests.get(api_url, headers=kandjiheaders, hooks={'response': request_handler})
-    if response.status_code == 200:
-        logging.debug("Got back a valid 200 response code.")
-        jsonresponse = response.json()
-        logging.debug("Returning: {}".format(jsonresponse))
-        return jsonresponse
-    elif b'policies.ratelimit.QuotaViolation' in response.content:
-        logging.info('Kandji responded with error code: {} - Policy Ratelimit Quota Violation - when we tried to look up id: {} Waiting a bit to retry the lookup.'.format(response, kandji_id))
-        logging.warning('Kandji Ratelimit exceeded: pausing ')
-        time.sleep(75)
-        logging.info("Finished waiting. Retrying lookup...")
-        newresponse = get_kandji_device_details(kandji_id)
-        return newresponse
-    else:
-        logging.warning('Kandji responded with error code:{} when we tried to look up id: {}'.format(response, kandji_id))
-        logging.debug("Returning a null value for the function.")
-        return None
+    logging.debug('Calling for device details in Kandji against: {}\n The token and headers for this GET request can be found near the beginning of the output.'.format(api_url))
+    response = kandji_api(method="GET", endpoint=f"/api/v1/devices/{kandji_id}/details")
+    return response
 
 # Function to lookup last activity date and time for a Kandji asset.
 def get_kandji_device_activity_date(kandji_id):
-    api_url = "{}/api/v1/devices/{}/activity".format(kandji_base, kandji_id)
-    response = requests.get(api_url, headers=kandjiheaders, hooks={'response': request_handler})
-    if response.status_code == 200:
-        logging.debug("Got back a valid 200 response code.")
-        jsonresponse = response.json()
-        logging.debug("Returning: {}".format(jsonresponse))
-        return jsonresponse
-    elif b'policies.ratelimit.QuotaViolation' in response.content:
-        logging.info('Kandji responded with error code: {} - Policy Ratelimit Quota Violation - when we tried to look up id: {} Waiting a bit to retry the lookup.'.format(response, kandji_id))
-        logging.warning('Kandji Ratelimit exceeded: pausing ')
-        time.sleep(75)
-        logging.info("Finished waiting. Retrying lookup...")
-        newresponse = get_kandji_device_details(kandji_id)
-        return newresponse
-    else:
-        logging.warning('Kandji responded with error code:{} when we tried to look up id: {}'.format(response, kandji_id))
-        logging.debug("Returning a null value for the function.")
-        return None
+    response = kandji_api(method="GET", endpoint=f"/api/v1/devices/{kandji_id}/activity")
+    return response
 
 # Function to update the asset tag of devices in Kandji with an number passed from Snipe-IT.
 def update_kandji_asset_tag(kandji_id, asset_tag):
-    api_url = "{}/api/v1/devices/{}".format(kandji_base, kandji_id)
-    payload = '{{"asset_tag": "{}"}}'.format(asset_tag)
-    logging.debug('Making PATCH request against: {}\nPayload for the PATCH request is: {}\nThe token and headers can be found near the beginning of the output.'.format(api_url, payload))
-    response = requests.patch(api_url, data=payload, headers=kandjiheaders, hooks={'response': request_handler})
-    if response.status_code == 201:
-        logging.debug("Got a 201 response. Returning: True")
-        return True
-    elif b'policies.ratelimit.QuotaViolation' in response.content:
-        logging.info('Kandji responded with error code: {} - Policy Ratelimit Quota Violation - when we tried to look up id: {} Waiting a bit to retry the lookup.'.format(response, kandji_id))
-        logging.warning('Kandji Ratelimit exceeded: pausing ')
-        time.sleep(75)
-        logging.info("Finished waiting. Retrying update...")
-        newresponse = update_kandji_asset_tag(kandji_id, asset_tag)
-        return newresponse
-    if response.status_code == 200:
-        logging.debug("Got a 200 response code. Returning the response: {}".format(response))
-        return response.json()
-    else:
-        logging.warning('Got back an error response code:{} - {}'.format(response.status_code, response.content))
-        return None
+    params = '{{"asset_tag": "{}"}}'.format(asset_tag)
+    logging.debug('Making PATCH request against: {}\nPayload for the PATCH request is: {}\nThe token and headers can be found near the beginning of the output.'.format(api_url, params))
+    response = kandji_api(method="PATCH", endpoint=f"/api/v1/devices/{kandji_id}/",params=params)
+    return response
 
 # Function to lookup a Snipe-IT asset by serial number.
 def search_snipe_asset(serial):
@@ -328,13 +386,13 @@ def get_snipe_models():
                     return newjsonresponse
                 else:
                     logging.error("We couldn't seem to get all of the model numbers")
-                    raise SystemExit("Unable to get all model objects from Snipe-IT instanace")
+                    sys.exit("Unable to get all model objects from Snipe-IT")
             else:
                 logging.error('When we tried to retreive a list of models, Snipe-IT responded with error status code:{} - {}'.format(response.status_code, response.content))
-                raise SystemExit("Snipe-IT models API endpoint failed.")
+                sys.exit("Snipe-IT models API endpoint failed.")
     else:
         logging.error('When we tried to retreive a list of models, Snipe-IT responded with error status code:{} - {}'.format(response.status_code, response.content))
-        raise SystemExit("Snipe-IT models API endpoint failed.")
+        sys.exit("Snipe-IT models API endpoint failed.")
 
 # Recursive function returns all users in a Snipe-IT Instance, 100 at a time.
 def get_snipe_users(previous=[]):
@@ -516,7 +574,7 @@ else:
 
 # Exit if you can't contact Snipe-IT or Kandji
 if ( KANDJI_UP == False ) or ( SNIPE_UP == False ):
-    raise SystemExit("Error: Host could not be contacted.")
+    sys.exit("Error: Host could not be contacted.")
 
 # Test that we can actually connect with the API keys.
 ##TODO Write some more tests here. ha!
@@ -570,12 +628,12 @@ else:
 if TotalNumber != None:
     logging.info('Received a list of Kandji assets that had {} entries.'.format(TotalNumber))
 else:
-    logging.error("We were not able to retreive a list of assets from your Kandji instance. It's likely that your settings, or credentials are incorrect. Check your settings.conf and verify you can make API calls outside of this system with the credentials found in your settings.conf")
-    raise SystemExit("Unable to get Kandji devices.")
+    logging.error("We were not able to retreive a list of assets from your Kandji instance. It's likely that your settings or credentials are incorrect. Check your settings.conf and verify you can make API calls outside of this system with the credentials found in your settings.conf")
+    sys.exit("Unable to get Kandji devices.")
 
 # After this point we start editing data, so quit if this is a dry run
 if user_args.dryrun:
-    raise SystemExit("Dry Run: Complete.")
+    sys.exit("Dry Run: Complete.")
 
 # From this point on, we're editing data.
 logging.info('Starting to Update Inventory')
