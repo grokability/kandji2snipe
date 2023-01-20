@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# kandji2snipe - Inventory Import
+# kandji2snipe - Asset Sync
 #
 # ABOUT:
 #   This program is designed to import inventory information from a Kandji instance
@@ -13,24 +13,24 @@
 #   MIT
 #
 # CONFIGURATION:
-#   These settings are commonly found in the settings.conf file.
+#   kandji2snipe settings are set in the settings.conf file. For more detais please see the README at
+#   https://github.com/briangoldstein/kandji2snipe
 #
 #   This setting sets the Snipe-IT asset status when creating a new asset. By default it's set to 4 (Pending).
 #   defaultStatus = 4
 #
-#   Using the [<platform>-api-mapping] sections, you can map Snipe-IT hardware values to Kandji values 
+#   Using the [<platform>-api-mapping] sections, you can map Snipe-IT hardware values to Kandji device values 
 #   The default example associates information that exists by default in both Snipe-IT and Kandji. 
 #   The Key value is the exact name of the Snipe-IT key name.
-#   Value1 is the "Subset" name, and the Value2 is the Kandji key name.
-#   Note that MAC Address are a custom value in Snipe-IT by default and you can use it as an example.
+#   Value1 is the array name, and the Value2 is the key name.
 #
-#   [api-mapping]
+#   [<platform>-api-mapping]
 #       name = general name
 #       _snipeit_mac_address_1 = general mac_address
-#       _snipeit_custom_name_1234567890 = subset kandji_key
+#       _snipeit_custom_name_1234567890 = kandji_array kandji_key
 #
-#   A list of valid subsets are:
-validsubset = [
+#   A list of valid array options are:
+validarrays = [
         "general",
         "mdm",
         "activation_lock",
@@ -47,7 +47,7 @@ validsubset = [
         "security_information"
 ]
 
-version = "0.1.0"
+version = "0.1.5"
 
 # Standard Library Imports
 import json
@@ -82,11 +82,11 @@ from requests.adapters import HTTPAdapter
 # Set us up for using runtime arguments by defining them.
 runtimeargs = argparse.ArgumentParser()
 runtimeargs.add_argument("-v", "--verbose", help="Sets the logging level to INFO and gives you a better idea of what the script is doing.", action="store_true")
-runtimeargs.add_argument("--auto_incrementing", help="You can use this if you have auto-incrementing enabled in your Snipe-IT instance to utilize that instead of adding the Kandji ID for the asset tag.", action="store_true")
+runtimeargs.add_argument("--auto_incrementing", help="You can use this if you have auto-incrementing enabled in your Snipe-IT instance to utilize that instead of using KANDJI-<SERIAL NUMBER> for the asset tag.", action="store_true")
 runtimeargs.add_argument("--dryrun", help="This checks your config and tries to contact both the Kandji and Snipe-IT instances, but exits before updating or syncing any assets.", action="store_true")
 runtimeargs.add_argument("-d", "--debug", help="Sets logging to include additional DEBUG messages.", action="store_true")
 runtimeargs.add_argument("--do_not_update_kandji", help="Does not update Kandji with the asset tags stored in Snipe-IT.", action="store_false")
-runtimeargs.add_argument('--do_not_verify_ssl', help="Skips SSL verification for all requests. Helpful when you use self-signed certificate.", action="store_false")
+runtimeargs.add_argument('--do_not_verify_ssl', help="Skips SSL verification for all Snipe-IT requests. Helpful when you use self-signed certificate.", action="store_false")
 runtimeargs.add_argument("-r", "--ratelimited", help="Puts a half second delay between Snipe-IT API calls to adhere to the standard 120/minute rate limit", action="store_true")
 runtimeargs.add_argument("-f", "--force", help="Updates the Snipe-IT asset with information from Kandji every time, despite what the timestamps indicate.", action="store_true")
 runtimeargs.add_argument("--version", help="Prints the version and exits.", action="store_true")
@@ -164,11 +164,11 @@ logging.debug('Request headers for Kandji will be: {}\nRequest headers for Snipe
 logging.debug("Checking the settings.conf file for valid Kandji subsets of the Kandji API so mapping can occur properly.")
 for key in config['mac-api-mapping']:
     kandjisplit = config['mac-api-mapping'][key].split()
-    if kandjisplit[0] in validsubset:
+    if kandjisplit[0] in validarrays:
         logging.info('Found subset {}: Acceptable'.format(kandjisplit[0]))
         continue
     else:
-        logging.error("Found invalid subset: {} in the settings.conf file.\nThis is not in the acceptable list of subsets. Check your settings.conf\n Valid subsets are: {}".format(kandjisplit[0], ', '.join(validsubset)))
+        logging.error("Found invalid subset: {} in the settings.conf file.\nThis is not in the acceptable list of subsets. Check your settings.conf\n Valid subsets are: {}".format(kandjisplit[0], ', '.join(validarrays)))
         sys.exit("Invalid Subset found in settings.conf")
 
 ### Setup Some Functions ###
@@ -386,7 +386,7 @@ def get_snipe_models():
                     return newjsonresponse
                 else:
                     logging.error("We couldn't seem to get all of the model numbers")
-                    sys.exit("Unable to get all model objects from Snipe-IT instanace")
+                    sys.exit("Unable to get all model objects from Snipe-IT")
             else:
                 logging.error('When we tried to retreive a list of models, Snipe-IT responded with error status code:{} - {}'.format(response.status_code, response.content))
                 sys.exit("Snipe-IT models API endpoint failed.")
