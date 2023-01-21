@@ -663,9 +663,7 @@ def checkout_snipe_asset(user, asset_id, asset_name, checked_out_user=None):
         logging.error('Asset checkout failed for asset {} with error {}'.format(asset_id,response.text))
         return response
 
-
-
-######### MAIN FUNCTION HERE IN THE FUTURE #########
+# Main Logic
 
 # Configure logging and set logging level
 set_logging()
@@ -865,7 +863,7 @@ for kandji_device_type in kandji_device_types:
                             if i == 0:
                                 kandji_value = kandji[item]
                             else:
-                                 kandji_value = kandji_value[item]
+                                kandji_value = kandji_value[item]
                         newasset[snipekey] = kandji_value
                     except KeyError:
                         continue
@@ -978,8 +976,8 @@ for kandji_device_type in kandji_device_types:
             if (kandji['general']['asset_tag'] != snipe['rows'][0]['asset_tag']) and user_args.do_not_update_kandji :
                 logging.info("Kandji doesn't have the same asset tag as Snipe-IT so we'll update it because it should be authoritative.")
                 if snipe['rows'][0]['asset_tag'][0]:
-                       update_kandji_asset_tag("{}".format(kandji['general']['device_id']), '{}'.format(snipe['rows'][0]['asset_tag']))
-                       logging.info("Updating device record")
+                    update_kandji_asset_tag("{}".format(kandji['general']['device_id']), '{}'.format(snipe['rows'][0]['asset_tag']))
+                    logging.info("Updating device record")
 
 if user_args.ratelimited:
     logging.debug('Total amount of API calls made: {}'.format(snipe_api_count))
