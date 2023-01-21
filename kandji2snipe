@@ -362,7 +362,9 @@ def get_kandji_devices(platform):
         )
 
         # get devices
-        response = kandji_api(method="GET", endpoint="/api/v1/devices", params=params)
+        endpoint="/api/v1/devices"
+        logging.debug('Calling for all devices in Kandji against: {}'.format(kandji_base + endpoint))
+        response = kandji_api(method="GET", endpoint=endpoint, params=params)
         count += len(response)
         offset += limit
         if len(response) == 0:
@@ -376,20 +378,24 @@ def get_kandji_devices(platform):
 
 # Function to lookup a Kandji asset by device_id.
 def get_kandji_device_details(kandji_id):
-    logging.debug('Calling for device details in Kandji against: {}\n The token and headers for this GET request can be found near the beginning of the output.'.format(api_url))
-    response = kandji_api(method="GET", endpoint=f"/api/v1/devices/{kandji_id}/details")
+    endpoint=f"/api/v1/devices/{kandji_id}/details"
+    logging.debug('Calling for device details in Kandji against: {}'.format(kandji_base + endpoint))
+    response = kandji_api(method="GET", endpoint=endpoint)
     return response
 
 # Function to lookup last activity date and time for a Kandji asset.
 def get_kandji_device_activity_date(kandji_id):
-    response = kandji_api(method="GET", endpoint=f"/api/v1/devices/{kandji_id}/activity")
+    endpoint=f"/api/v1/devices/{kandji_id}/activity"
+    logging.debug('Calling for device activity in Kandji against: {}'.format(kandji_base + endpoint))
+    response = kandji_api(method="GET", endpoint=endpoint)
     return response
 
 # Function to update the asset tag of devices in Kandji with an number passed from Snipe-IT.
 def update_kandji_asset_tag(kandji_id, asset_tag):
+    endpoint=f"/api/v1/devices/{kandji_id}/"
     params = '{{"asset_tag": "{}"}}'.format(asset_tag)
-    logging.debug('Making PATCH request against: {}\nPayload for the PATCH request is: {}\nThe token and headers can be found near the beginning of the output.'.format(api_url, params))
-    response = kandji_api(method="PATCH", endpoint=f"/api/v1/devices/{kandji_id}/",params=params)
+    logging.debug('Making PATCH request against: {}\n\tPayload for the request is: {}'.format(kandji_base + endpoint, params))
+    response = kandji_api(method="PATCH", endpoint=endpoint,params=params)
     return response
 
 # Function to lookup a Snipe-IT asset by serial number.
@@ -633,6 +639,7 @@ kandjiaccesstest()
 logging.info("Finished running our tests.")
 
 ### Get Started ###
+
 # Get a list of known models from Snipe-IT
 logging.info("Getting a list of device models that Snipe-IT knows about.")
 snipemodels = get_snipe_models()
@@ -911,4 +918,5 @@ for kandji_device_type in kandji_device_types:
                        update_kandji_asset_tag("{}".format(kandji['general']['device_id']), '{}'.format(snipe['rows'][0]['asset_tag']))
                        logging.info("Updating device record")
 
-logging.debug('Total amount of API calls made: {}'.format(snipe_api_count))
+if user_args.ratelimited:
+    logging.debug('Total amount of API calls made: {}'.format(snipe_api_count))
