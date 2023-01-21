@@ -135,16 +135,76 @@ if 'snipe-it' not in set(config):
 
 logging.info("Great, we found a settings.conf file. Let's get started by parsing all of the settings.")
 
-# Set some Variables from the settings.conf:
+# Settings.conf Value Validation - Ensuring some important settings are not empty or default values
+logging.debug("Checking the settings.conf file for valid values.")
 
-# Kandji base URL and API token.
-kandji_base = config['kandji']['url']
-logging.info("The configured Kandji base url is: {}".format(kandji_base))
+if config['kandji']['tenant'] == "TENANTNAME" or config['kandji']['tenant'] == "":
+    sys.exit("Error: Invalid Kandji Tenant, check your settings.conf and try again.")
+
+if config['kandji']['region'] != "us" and config['kandji']['region'] != "eu":
+    sys.exit("Error: Invalid Kandji Region, check your settings.conf and try again.")
+
+if config['kandji']['apitoken'] == "kandji-api-bearer-token-here" or config['kandji']['apitoken'] == "":
+    sys.exit("Error: Invalid Kandji API Token, check your settings.conf and try again.")
+
+if config['snipe-it']['url'] == "https://your_snipe_instance.com"or config['snipe-it']['url'] == "":
+    sys.exit("Error: Invalid Snipe-IT URL, check your settings.conf and try again.")
+
+if config['snipe-it']['apikey'] == "snipe-api-key-here" or config['snipe-it']['apikey'] == "":
+    sys.exit("Error: Invalid Snipe-IT API Key, check your settings.conf and try again.")
+
+if config['snipe-it']['mac_custom_fieldset_id'] != "":
+    for key in config['mac-api-mapping']:
+        kandjisplit = config['mac-api-mapping'][key].split()
+        if kandjisplit[0] in validarrays:
+            logging.debug('Found valid array: {}'.format(kandjisplit[0]))
+            continue
+        else:
+            logging.error("Found invalid array: {} in the settings.conf file.\nThis is not in the acceptable list of arrays. Check your settings.conf\n Valid arrays are: {}".format(kandjisplit[0], ', '.join(validarrays)))
+            sys.exit()
+if config['snipe-it']['iphone_custom_fieldset_id'] != "":
+    for key in config['iphone-api-mapping']:
+        kandjisplit = config['iphone-api-mapping'][key].split()
+        if kandjisplit[0] in validarrays:
+            logging.debug('Found valid array: {}'.format(kandjisplit[0]))
+            continue
+        else:
+            logging.error("Found invalid array: {} in the settings.conf file.\nThis is not in the acceptable list of arrays. Check your settings.conf\n Valid arrays are: {}".format(kandjisplit[0], ', '.join(validarrays)))
+            sys.exit()
+if config['snipe-it']['ipad_custom_fieldset_id'] != "":
+    for key in config['ipad-api-mapping']:
+        kandjisplit = config['ipad-api-mapping'][key].split()
+        if kandjisplit[0] in validarrays:
+            logging.debug('Found valid array: {}'.format(kandjisplit[0]))
+            continue
+        else:
+            logging.error("Found invalid array: {} in the settings.conf file.\nThis is not in the acceptable list of arrays. Check your settings.conf\n Valid arrays are: {}".format(kandjisplit[0], ', '.join(validarrays)))
+            sys.exit()
+if config['snipe-it']['appletv_custom_fieldset_id'] != "":
+    for key in config['appletv-api-mapping']:
+        kandjisplit = config['appletv-api-mapping'][key].split()
+        if kandjisplit[0] in validarrays:
+            logging.debug('Found valid array: {}'.format(kandjisplit[0]))
+            continue
+        else:
+            logging.error("Found invalid array: {} in the settings.conf file.\nThis is not in the acceptable list of arrays. Check your settings.conf\n Valid arrays are: {}".format(kandjisplit[0], ', '.join(validarrays)))
+            sys.exit()
+
+# Set variables from the settings.conf...
+
+# Kandji Base URL
+if config['kandji']['region'] == "us":
+    kandji_base = f"https://{config['kandji']['tenant']}.clients.{config['kandji']['region']}-1.kandji.io"
+    logging.info("The configured Kandji base url is: {}".format(kandji_base))
+else:
+    kandji_base = f"https://{config['kandji']['tenant']}.clients.{config['kandji']['region']}.kandji.io"
+    logging.info("The configured Kandji base url is: {}".format(kandji_base))
+
+# Kandji API Token
 kandji_apitoken = config['kandji']['apitoken']
 logging.debug("The API token you provided for Kandji is: {}".format(kandji_apitoken))
 
 # Snipe-IT base URL, API key, default status, and Apple manufacturer ID
-
 snipe_base = config['snipe-it']['url']
 logging.info("The configured Snipe-IT base url is: {}".format(snipe_base))
 snipe_apikey = config['snipe-it']['apikey']
@@ -160,16 +220,6 @@ kandjiheaders = {'Authorization': 'Bearer {}'.format(kandji_apitoken),'Accept': 
 snipeheaders = {'Authorization': 'Bearer {}'.format(snipe_apikey),'Accept': 'application/json','Content-Type':'application/json'}
 logging.debug('Request headers for Kandji will be: {}\nRequest headers for Snipe-IT will be: {}'.format(kandjiheaders, snipeheaders))
 
-# Check the config file for valid Kandji subsets.
-logging.debug("Checking the settings.conf file for valid Kandji subsets of the Kandji API so mapping can occur properly.")
-for key in config['mac-api-mapping']:
-    kandjisplit = config['mac-api-mapping'][key].split()
-    if kandjisplit[0] in validarrays:
-        logging.info('Found subset {}: Acceptable'.format(kandjisplit[0]))
-        continue
-    else:
-        logging.error("Found invalid subset: {} in the settings.conf file.\nThis is not in the acceptable list of subsets. Check your settings.conf\n Valid subsets are: {}".format(kandjisplit[0], ', '.join(validarrays)))
-        sys.exit("Invalid Subset found in settings.conf")
 
 ### Setup Some Functions ###
 snipe_api_count = 0

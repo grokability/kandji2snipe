@@ -1,5 +1,9 @@
+# For details on configuring your settings.conf file, please read the 
+# README at https://github.com/briangoldstein/kandji2snipe
+
 [kandji]
-url = https://TENANTNAME.clients.us-1.kandji.io
+tenant = TENANTNAME
+region = us
 apitoken = kandji-api-bearer-token-here
 
 [snipe-it]
@@ -13,11 +17,11 @@ mac_model_category_id = 5
 iphone_model_category_id = 6
 ipad_model_category_id = 7
 appletv_model_category_id = 8
-# Custom fieldsets are not required unless mapping Kandji data to Snipe-IT custom fields 
-#mac_custom_fieldset_id = 2
-#iphone_custom_fieldset_id = 3
-#ipad_custom_fieldset_id = 4
-#appletv_custom_fieldset_id = 5
+# Custom fieldset values are not required unless mapping Kandji data to Snipe-IT custom fields 
+mac_custom_fieldset_id = 
+iphone_custom_fieldset_id = 
+ipad_custom_fieldset_id = 
+appletv_custom_fieldset_id = 
 
 [asset-tag]
 # If an asset tag does not exist in Kandji and Snipe-IT, the script will create one
