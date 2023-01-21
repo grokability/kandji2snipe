@@ -230,7 +230,7 @@ def request_handler(r, *args, **kwargs):
     global first_snipe_call
     if (snipe_base in r.url) and user_args.ratelimited:
         if '"messages":429' in r.text:
-            logging.warn("Despite respecting the rate limit of Snipe-IT, we've still been limited. Trying again after sleeping for 2 seconds.")
+            logging.warning("Despite respecting the rate limit of Snipe-IT, we've still been limited. Trying again after sleeping for 2 seconds.")
             time.sleep(2)
             re_req = r.request
             s = requests.Session()
