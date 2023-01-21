@@ -82,14 +82,15 @@ from requests.adapters import HTTPAdapter
 # Set us up for using runtime arguments by defining them.
 runtimeargs = argparse.ArgumentParser()
 runtimeargs.add_argument("-v", "--verbose", help="Sets the logging level to INFO and gives you a better idea of what the script is doing.", action="store_true")
-runtimeargs.add_argument("--auto_incrementing", help="You can use this if you have auto-incrementing enabled in your Snipe-IT instance to utilize that instead of using KANDJI-<SERIAL NUMBER> for the asset tag.", action="store_true")
-runtimeargs.add_argument("--dryrun", help="This checks your config and tries to contact both the Kandji and Snipe-IT instances, but exits before updating or syncing any assets.", action="store_true")
 runtimeargs.add_argument("-d", "--debug", help="Sets logging to include additional DEBUG messages.", action="store_true")
+runtimeargs.add_argument("-l", "--logfile", help="Saves logging messages to kandji2snipe.log instead of displaying on screen.", action="store_true")
+runtimeargs.add_argument("--dryrun", help="This checks your config and tries to contact both the Kandji and Snipe-IT instances, but exits before updating or syncing any assets.", action="store_true")
+runtimeargs.add_argument("--version", help="Prints the version and exits.", action="store_true")
+runtimeargs.add_argument("--auto_incrementing", help="You can use this if you have auto-incrementing enabled in your Snipe-IT instance to utilize that instead of using KANDJI-<SERIAL NUMBER> for the asset tag.", action="store_true")
 runtimeargs.add_argument("--do_not_update_kandji", help="Does not update Kandji with the asset tags stored in Snipe-IT.", action="store_false")
 runtimeargs.add_argument('--do_not_verify_ssl', help="Skips SSL verification for all Snipe-IT requests. Helpful when you use self-signed certificate.", action="store_false")
 runtimeargs.add_argument("-r", "--ratelimited", help="Puts a half second delay between Snipe-IT API calls to adhere to the standard 120/minute rate limit", action="store_true")
 runtimeargs.add_argument("-f", "--force", help="Updates the Snipe-IT asset with information from Kandji every time, despite what the timestamps indicate.", action="store_true")
-runtimeargs.add_argument("--version", help="Prints the version and exits.", action="store_true")
 user_opts = runtimeargs.add_mutually_exclusive_group()
 user_opts.add_argument("-u", "--users", help="Checks in/out assets based on the user assignment in Kandji.", action="store_true")
 runtimeargs.add_argument("-uns", "--users_no_search", help="Doesn't search for any users if the specified fields in Kandji and Snipe-IT don't match. (case insensitive)", action="store_true")
@@ -105,13 +106,24 @@ if user_args.version:
     print('kandji2snipe v'+version)
     sys.exit()
 
-# Notify users they're going to get a wall of text in verbose mode.
-if user_args.verbose:
-    logging.basicConfig(level=logging.INFO)
-elif user_args.debug:
-    logging.basicConfig(level=logging.DEBUG)
+# Setup logging
+if user_args.logfile:
+    log_file = 'kandji2snipe.log'
 else:
-    logging.basicConfig(level=logging.WARNING)
+    log_file = ''
+
+log_format = '%(asctime)s - %(levelname)s - %(message)s'
+date_format = '%Y-%m-%d %H:%M:%S'
+
+# Set logging level
+if user_args.verbose:
+    logging.basicConfig(level=logging.INFO,format=log_format,datefmt=date_format,filename=log_file)
+    logging.info('Verbose Logging Enabled...')
+elif user_args.debug:
+    logging.basicConfig(level=logging.DEBUG,format=log_format,datefmt=date_format,filename=log_file)
+    logging.info('Debug Logging Enabled...')
+else:
+    logging.basicConfig(level=logging.WARNING,format=log_format,datefmt=date_format,filename=log_file)
 
 # Notify users if we're doing a dry run.
 if user_args.dryrun:

@@ -1,0 +1,17 @@
+2023-01-21 12:41:40 - INFO - Verbose Logging Enabled...
+2023-01-21 12:41:40 - INFO - Searching for a valid settings.conf file.
+2023-01-21 12:41:40 - INFO - Great, we found a settings.conf file. Let's get started by parsing all of the settings.
+2023-01-21 12:41:40 - INFO - The configured Kandji base url is: https://briangoldstein.clients.us-1.kandji.io
+2023-01-21 12:41:40 - INFO - The configured Snipe-IT base url is: https://snipeit.goldie.cloud
+2023-01-21 12:41:40 - INFO - The default status we'll be setting updated device to is: 2
+2023-01-21 12:41:40 - INFO - The Apple manufacturer ID in Snipe-IT is set to: 1
+2023-01-21 12:41:40 - INFO - Creating the headers we'll need for API calls
+2023-01-21 12:41:40 - INFO - SSL Verification is set to: True
+2023-01-21 12:41:40 - INFO - Running tests to see if hosts are up.
+2023-01-21 12:41:40 - INFO - We were able to get a good response from your Snipe-IT instance.
+2023-01-21 12:41:41 - INFO - We were able to get a good response from your Kandji instance.
+2023-01-21 12:41:41 - INFO - Finished running our tests.
+2023-01-21 12:41:41 - INFO - Getting a list of device models that Snipe-IT knows about.
+2023-01-21 12:41:41 - INFO - Got a valid response that should have 6 models.
+2023-01-21 12:41:41 - INFO - Our list of models has 6 entries.
+2023-01-21 12:41:42 - INFO - Received a list of Kandji assets that had 10 entries.
