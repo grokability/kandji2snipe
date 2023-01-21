@@ -251,6 +251,7 @@ def request_handler(r, *args, **kwargs):
         sys.exit("We've been rate limited. Use option -r to respect the built in Snipe-IT API rate limit of 120/minute.")
     return r
 
+# Kandji API Error Handling
 def kandji_error_handling(resp, resp_code, err_msg):
     """Handle HTTP errors."""
     # 400
@@ -304,6 +305,7 @@ def kandji_error_handling(resp, resp_code, err_msg):
         logging.error(err_msg)
         sys.exit()
 
+# Function to use the Kandji API
 def kandji_api(method, endpoint, params=None, payload=None):
     """Make an API request and return data.
     method   - an HTTP Method (GET, POST, PATCH, DELETE).
@@ -376,7 +378,7 @@ def get_kandji_devices(platform):
 
     return data
 
-# Function to lookup a Kandji asset by device_id.
+# Function to lookup details of a specific Kandji asset using the Device ID.
 def get_kandji_device_details(kandji_id):
     endpoint=f"/api/v1/devices/{kandji_id}/details"
     logging.debug('Calling for device details in Kandji against: {}'.format(kandji_base + endpoint))
@@ -422,7 +424,7 @@ def search_snipe_asset(serial):
         logging.debug('{} - {}'.format(response.status_code, response.content))
         return "ERROR"
 
-# Function to get all the asset models
+# Function to get all the asset models from Snipe-IT
 def get_snipe_models():
     api_url = '{}/api/v1/models'.format(snipe_base)
     logging.debug('Calling against: {}'.format(api_url))
@@ -601,7 +603,8 @@ def checkout_snipe_asset(user, asset_id, asset_name, checked_out_user=None):
         logging.error('Asset checkout failed for asset {} with error {}'.format(asset_id,response.text))
         return response
 
-def snipeaccesstest():
+# Function to make sure Snipe-IT is accessible.
+def snipe_access_test():
     try:
         SNIPE_UP = True if requests.get(snipe_base, verify=user_args.do_not_verify_ssl).status_code == 200 else False
     except Exception as e:
@@ -613,7 +616,8 @@ def snipeaccesstest():
     else:
         logging.info('We were able to get a good response from your Snipe-IT instance.')
 
-def kandjiaccesstest():
+# Function to make sure Kandji is accessible.
+def kandji_access_test():
     try:
         api_url = '{0}/api/v1/devices'.format(kandji_base)
         KANDJI_UP = True if requests.get(api_url).status_code in (200, 401) else False
@@ -633,8 +637,8 @@ logging.info("SSL Verification is set to: {}".format(user_args.do_not_verify_ssl
 
 # Do some tests to see if the hosts are up.
 logging.info("Running tests to see if hosts are up.")
-snipeaccesstest()
-kandjiaccesstest()
+snipe_access_test()
+kandji_access_test()
 
 logging.info("Finished running our tests.")
 
