@@ -98,11 +98,6 @@ type_opts.add_argument("--ipad", help="Runs against Kandji iPads only.", action=
 type_opts.add_argument("--appletv", help="Runs against Kandji Apple TVs only.", action="store_true")
 user_args = runtimeargs.parse_args()
 
-# Print version and exit
-if user_args.version:
-    print('kandji2snipe v'+version)
-    sys.exit()
-
 # Define Functions 
 
 # Find and validate the settings.conf file  
@@ -662,7 +657,12 @@ def checkout_snipe_asset(user, asset_id, asset_name, checked_out_user=None):
         logging.error('Asset checkout failed for asset {} with error {}'.format(asset_id,response.text))
         return response
 
-# Main Logic
+### Main Logic ###
+
+# Print version and exit
+if user_args.version:
+    print('kandji2snipe v'+version)
+    sys.exit()
 
 # Configure logging and set logging level
 set_logging()
