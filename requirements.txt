@@ -1,4 +1,2 @@
-configparser
 requests
-datetime
 pytz
