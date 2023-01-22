@@ -2,47 +2,19 @@
 # kandji2snipe
 #
 # ABOUT:
-#   This program is designed to import inventory information from a Kandji instance
-#   into Snipe-IT using the Snipe-IT and Kandji APIs. For more information about both
-#   of these products, please visit their respecitive websites:
+#   This python3 script leverages the Kandji and Snipe-IT APIs to sync device details
+#   from Kandji to Snipe-IT and sync asset tags from Snipe-IT to Kandji.
 #
-#       https://kandji.io
-#       https://snipeitapp.com
+#   https://kandji.io
+#   https://snipeitapp.com
 #
 # LICENSE:
 #   MIT
 #
 # CONFIGURATION:
-#   kandji2snipe settings are set in the settings.conf file. For more detais please see the README at
-#   https://github.com/briangoldstein/kandji2snipe
+#   kandji2snipe settings are set in the settings.conf file. For more detais please see
+#   the README at https://github.com/briangoldstein/kandji2snipe
 #
-#   Using the [<platform>-api-mapping] sections, you can map Snipe-IT hardware values to Kandji device values 
-#   The default example associates information that exists by default in both Snipe-IT and Kandji. 
-#   The Key value is the exact name of the Snipe-IT key name.
-#   Value1 is the array name, and the Value2 is the key name.
-#
-#   [<platform>-api-mapping]
-#       name = general name
-#       _snipeit_mac_address_1 = general mac_address
-#       _snipeit_custom_name_1234567890 = kandji_array kandji_key
-#
-#   A list of valid array options are:
-validarrays = [
-        "general",
-        "mdm",
-        "activation_lock",
-        "filevault",
-        "automated_device_enrollment",
-        "kandji_agent",
-        "hardware_overview",
-        "volumes",
-        "network",
-        "recovery_information",
-        "users",
-        "installed_profiles",
-        "apple_business_manager",
-        "security_information"
-]
 
 version = "0.1.6"
 
@@ -97,6 +69,23 @@ type_opts.add_argument("--iphone", help="Runs against Kandji iPhones only.", act
 type_opts.add_argument("--ipad", help="Runs against Kandji iPads only.", action="store_true")
 type_opts.add_argument("--appletv", help="Runs against Kandji Apple TVs only.", action="store_true")
 user_args = runtimeargs.parse_args()
+
+validarrays = [
+        "general",
+        "mdm",
+        "activation_lock",
+        "filevault",
+        "automated_device_enrollment",
+        "kandji_agent",
+        "hardware_overview",
+        "volumes",
+        "network",
+        "recovery_information",
+        "users",
+        "installed_profiles",
+        "apple_business_manager",
+        "security_information"
+]
 
 # Define Functions 
 
