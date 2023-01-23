@@ -836,37 +836,33 @@ for kandji_device_type in kandji_device_types:
             # Create the payload
             logging.debug("Payload is being made.")
             newasset = {'asset_tag': kandji_asset_tag,'model_id': modelnumbers['{}'.format(kandji['hardware_overview']['model_identifier'])], 'name': kandji['general']['device_name'], 'status_id': defaultStatus,'serial': kandji['hardware_overview']['serial_number']}
-            if kandji['hardware_overview']['serial_number'] == 'Not Available':
-                logging.warning("The serial number is not available in Kandji. Since there's no serial number yet, we'll skip it for now.")
-                continue
-            else:
-                for snipekey in config['{}-api-mapping'.format(kandji_device_type)]:
-                    kandjisplit = config['{}-api-mapping'.format(kandji_device_type)][snipekey].split()
-                    try:
-                        for i, item in enumerate(kandjisplit):
-                            try:
-                                item = int(item)
-                            except ValueError:
-                                logging.debug('{} is not an integer'.format(item))
-                            if i == 0:
-                                kandji_value = kandji[item]
-                            else:
-                                kandji_value = kandji_value[item]
-                        newasset[snipekey] = kandji_value
-                    except KeyError:
-                        continue
-                # Reset the payload without the asset_tag if auto_incrementing flag is set.
-                if user_args.auto_incrementing:
-                    newasset.pop('asset_tag', None)
-                new_snipe_asset = create_snipe_asset(newasset)
-                if new_snipe_asset[0] != "AssetCreated":
+            for snipekey in config['{}-api-mapping'.format(kandji_device_type)]:
+                kandjisplit = config['{}-api-mapping'.format(kandji_device_type)][snipekey].split()
+                try:
+                    for i, item in enumerate(kandjisplit):
+                        try:
+                            item = int(item)
+                        except ValueError:
+                            logging.debug('{} is not an integer'.format(item))
+                        if i == 0:
+                            kandji_value = kandji[item]
+                        else:
+                            kandji_value = kandji_value[item]
+                    newasset[snipekey] = kandji_value
+                except KeyError:
                     continue
-                if user_args.users:
-                    if not kandji['general']['assigned_user']:
-                        logging.info("No user is assigned to {} in Kandji, not checking it out.".format(kandji['general']['device_name']))
-                        continue
-                    logging.info('Checking out new item {} to user {}'.format(kandji['general']['device_name'], kandji['general']['assigned_user']['email']))
-                    checkout_snipe_asset(kandji['general']['assigned_user']['email'], new_snipe_asset[1].json()['payload']['id'], "NewAsset")
+            # Reset the payload without the asset_tag if auto_incrementing flag is set.
+            if user_args.auto_incrementing:
+                newasset.pop('asset_tag', None)
+            new_snipe_asset = create_snipe_asset(newasset)
+            if new_snipe_asset[0] != "AssetCreated":
+                continue
+            if user_args.users:
+                if not kandji['general']['assigned_user']:
+                    logging.info("No user is assigned to {} in Kandji, not checking it out.".format(kandji['general']['device_name']))
+                    continue
+                logging.info('Checking out new item {} to user {}'.format(kandji['general']['device_name'], kandji['general']['assigned_user']['email']))
+                checkout_snipe_asset(kandji['general']['assigned_user']['email'], new_snipe_asset[1].json()['payload']['id'], "NewAsset")
 
         # Log an error if there's an issue, or more than once match.
         elif snipe == 'MultiMatch':
@@ -887,7 +883,7 @@ for kandji_device_type in kandji_device_types:
             # Check to see that the Kandji record is newer than the previous Snipe-IT update, or if it is a new record in Snipe-IT
             if ( kandji_time > snipe_time ) or ( user_args.force ):
                 if user_args.force:
-                    logging.debug("Forced the Update regardless of the timestamps below.")
+                    logging.info("Forcing the update regardless of the timestamps due to -f being used.")
                 logging.debug("Updating the Snipe-IT asset because Kandji has a more recent timestamp: {} > {} or the Snipe-IT record is new".format(kandji_time, snipe_time))
                 updates = {}
 
