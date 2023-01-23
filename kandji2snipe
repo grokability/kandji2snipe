@@ -889,7 +889,7 @@ for kandji_device_type in kandji_device_types:
                 updates = {}
 
                 if html.unescape(snipe['rows'][0]['name']) != kandji['general']['device_name']:
-                    logging.info('Device name changed in Kandji. Updating in Snipe-IT.')
+                    logging.info('Device name changed in Kandji... Updating Snipe-IT')
                     updates={'name': kandji['general']['device_name']}
 
                 for snipekey in config['{}-api-mapping'.format(kandji_device_type)]:
@@ -956,10 +956,10 @@ for kandji_device_type in kandji_device_types:
                 logging.info("Snipe-IT record is newer than the Kandji record. Nothing to sync. If this wrong, then force an inventory update in Kandji")
                 logging.debug("Not updating the Snipe-IT asset because Snipe-IT has a more recent timestamp: {} < {}".format(kandji_time, snipe_time))
 
-            # Update/Sync the Snipe-IT Asset Tag Number back to Kandji
+            # Sync the Snipe-IT Asset Tag Number back to Kandji if needed
             # The user arg below is set to false if it's called, so this would fail if the user called it.
             if (kandji['general']['asset_tag'] != snipe['rows'][0]['asset_tag']) and user_args.do_not_update_kandji :
-                logging.info("Kandji doesn't have the same asset tag as Snipe-IT so we'll update it because it should be authoritative.")
+                logging.info("Asset tag changed in Snipe-IT... Updating Kandji")
                 if snipe['rows'][0]['asset_tag'][0]:
                     update_kandji_asset_tag("{}".format(kandji['general']['device_id']), '{}'.format(snipe['rows'][0]['asset_tag']))
                     logging.info("Updating device record")
