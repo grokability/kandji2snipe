@@ -437,10 +437,10 @@ def get_kandji_device_activity_date(kandji_id):
 
 # Function to update the asset tag of devices in Kandji with an number passed from Snipe-IT.
 def update_kandji_asset_tag(kandji_id, asset_tag):
-    endpoint=f"/api/v1/devices/{kandji_id}/"
-    params = '{{"asset_tag": "{}"}}'.format(asset_tag)
-    logging.debug('Making PATCH request against: {}\n\tPayload for the request is: {}'.format(kandji_base + endpoint, params))
-    response = kandji_api(method="PATCH", endpoint=endpoint,params=params)
+    endpoint=f"/api/v1/devices/{kandji_id}"
+    payload = '{{"asset_tag": "{}"}}'.format(asset_tag)
+    logging.debug('Making PATCH request against: {}\n\tPayload for the request is: {}'.format(kandji_base + endpoint, payload))
+    response = kandji_api(method="PATCH", endpoint=endpoint,payload=payload)
     return response
 
 # Function to lookup a Snipe-IT asset by serial number.
