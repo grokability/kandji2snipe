@@ -16,7 +16,7 @@
 #   the README at https://github.com/briangoldstein/kandji2snipe
 #
 
-version = "0.1.6"
+version = "0.2.0"
 
 # Standard Library Imports
 import json
