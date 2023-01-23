@@ -14,11 +14,7 @@ If the asset tag field is blank in Kandji when the record is being created in Sn
 ## Requirements:
 
 - Python3
-- Python dependencies - Can be installed using the included `requirements.txt` using the command `python3 -m pip install -r requirements.txt` or individually with the following commands:
-    ```shell
-    python3 -m pip install requests
-    python3 -m pip install pytz
-    ```
+- Python dependencies - Can be installed using the included `requirements.txt` using the command `python3 -m pip install -r requirements.txt` or individually using the commands `python3 -m pip install requests` and `python3 -m pip install pytz`.
 - A [Kandji API token](https://support.kandji.io/support/solutions/articles/72000560412-kandji-api) with the following permissions:
   - Devices
     - Updated a Device
@@ -132,9 +128,9 @@ optional arguments:
 
 ## Testing
 
-It is recomended that you use test/dev Snipe-IT instance for testing and that your backups are up to date. You can spin up a Snipe-IT instance in Docker pretty quickly ([see the Snipe-IT docs](https://snipe-it.readme.io/docs/docker)).
+It is recommended that you use a test/dev Snipe-IT instance for testing and that your backups are up to date. You can spin up a Snipe-IT instance in Docker pretty quickly ([see the Snipe-IT docs](https://snipe-it.readme.io/docs/docker)).
 
-If you do no thave a test/dev Kandji tenant, you can test kandji2snipe using the `--do_not_update_kandji` argument to prevent data being written back to Kandji.
+If you do not have a test/dev Kandji tenant, you can test kandji2snipe using the `--do_not_update_kandji` argument to prevent data being written back to Kandji.
 
 ## Acknowledgements
 
