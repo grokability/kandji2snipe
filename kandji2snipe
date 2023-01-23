@@ -25,6 +25,7 @@ import configparser
 import argparse
 import logging
 import sys
+import html
 from datetime import datetime
 
 # 3rd Party Imports
@@ -887,7 +888,7 @@ for kandji_device_type in kandji_device_types:
                 logging.debug("Updating the Snipe-IT asset because Kandji has a more recent timestamp: {} > {} or the Snipe-IT record is new".format(kandji_time, snipe_time))
                 updates = {}
 
-                if snipe['rows'][0]['name'] != kandji['general']['device_name']:
+                if html.unescape(snipe['rows'][0]['name']) != kandji['general']['device_name']:
                     logging.info('Device name changed in Kandji. Updating in Snipe-IT.')
                     updates={'name': kandji['general']['device_name']}
 
