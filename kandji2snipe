@@ -61,8 +61,7 @@ runtimeargs.add_argument("--do_not_update_kandji", help="Does not update Kandji 
 runtimeargs.add_argument('--do_not_verify_ssl', help="Skips SSL verification for all Snipe-IT requests. Helpful when you use self-signed certificate.", action="store_false")
 runtimeargs.add_argument("-r", "--ratelimited", help="Puts a half second delay between Snipe-IT API calls to adhere to the standard 120/minute rate limit", action="store_true")
 runtimeargs.add_argument("-f", "--force", help="Updates the Snipe-IT asset with information from Kandji every time, despite what the timestamps indicate.", action="store_true")
-user_opts = runtimeargs.add_mutually_exclusive_group()
-user_opts.add_argument("-u", "--users", help="Checks in/out assets based on the user assignment in Kandji.", action="store_true")
+runtimeargs.add_argument("-u", "--users", help="Checks in/out assets based on the user assignment in Kandji.", action="store_true")
 runtimeargs.add_argument("-uns", "--users_no_search", help="Doesn't search for any users if the specified fields in Kandji and Snipe-IT don't match. (case insensitive)", action="store_true")
 type_opts = runtimeargs.add_mutually_exclusive_group()
 type_opts.add_argument("--mac", help="Runs against Kandji Mac computers only.", action="store_true")
@@ -663,6 +662,11 @@ if user_args.dryrun and user_args.logfile:
     print("Dry Run: Starting")
 elif user_args.dryrun:
     logging.info('Dry Run: Starting')
+
+# Validate User Sync Options
+if user_args.users_no_search and not user_args.users:
+    logging.error("The -uns option requires the use of -u for user syncing.")
+    sys.exit(exit_error_message)
 
 # Find and validate the settings.conf file  
 get_settings()
