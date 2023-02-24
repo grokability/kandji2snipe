@@ -46,7 +46,7 @@ Note: do not add `""` or `''` around any values.
 
 **[kandji]**
 
-- **`tenant`**: Your tenant name, for example beekeeper.kandji.io would be **beekeepr**
+- **`tenant`**: Your tenant name, for example beekeeper.kandji.io would be **beekeeper**
 - **`region`**: **us** or **eu**
 - **`apitoken`**: Your [Kandji API token](https://support.kandji.io/support/solutions/articles/72000560412-kandji-api)
 
