@@ -46,7 +46,7 @@ Note: do not add `""` or `''` around any values.
 
 **[kandji]**
 
-- **`tenant`**: Your tenant name, for example beekeeper.kandji.io would be **beekeepr**
+- **`tenant`**: Your tenant name, for example accuhive.kandji.io would be **accuhive**
 - **`region`**: **us** or **eu**
 - **`apitoken`**: Your [Kandji API token](https://support.kandji.io/support/solutions/articles/72000560412-kandji-api)
 
@@ -87,7 +87,7 @@ Note: do not add `""` or `''` around any values.
 
 To get the database fields for Snipe-IT Custom Fields, go to Custom Fields, scroll down past Fieldsets to Custom Fields, click the column selection and button and select the unchecked 'DB Field' checkbox. Copy and paste the DB Field name for the Snipe under *platform*-api-mapping sections in settings.conf.
 
-To get the API mapping fields for Kandji, refer to Kandji's [Device Details](https://api.kandji.io/#efa2170d-e5f7-4b97-8f4c-da6f84ba58b5) API example response.
+To get the API mapping fields for Kandji, refer to Kandji's [Device Details](https://api-docs.kandji.io/#e320f334-d7d4-4c15-b75d-bc956b2943d5) API example response.
 
 You need to set the manufacturer_id for Apple devices in the settings.conf file.  To get this, go to Manufacturers, click the column selection button and select the `ID` checkbox.
 
