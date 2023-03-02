@@ -2,14 +2,16 @@
 
 ## About
 
-This `python3` script leverages the [Kandji](https://kandji.io) and [Snipe-IT](https://snipeitapp.com) APIs to sync device details from Kandji to Snipe-IT and sync asset tags from Snipe-IT to Kandji.
+This `python3` script leverages the [Kandji](https://kandji.io) and [Snipe-IT](https://snipeitapp.com) APIs to accomplish two things:
+* Sync device details from Kandji to Snipe-IT
+* Sync asset tags from Snipe-IT to Kandji.
 
 ## Overview:
-This tool will sync assets between your Kandji and Snipe-IT instances. The tool searches for assets based on the serial number, not the existing asset tag. If assets exist in Kandji and are not in Snipe-IT, the tool will create an asset and try to match it with an existing Snipe-IT model. This match is based on the device's model identifier (ex. MacBookAir7,1) being entered as the model number in Snipe-IT, rather than the model name. If a matching model isn't found, it will create one.
+kandji2snipe is designed to sync assets between your Kandji and Snipe-IT instances. The tool searches for assets based on the serial number, not the existing asset tag. If assets exist in Kandji and are not in Snipe-IT, the tool will create an asset and try to match it with an existing Snipe-IT model. This match is based on the device's model identifier (ex. MacBookAir7,1) being entered as the model number in Snipe-IT, rather than the model name. If a matching model isn't found, it will create one.
 
-When an asset is first created, it will fill out only the most basic information. When the asset already exists in your Snipe-IT inventory, the tool will sync the information you specify in the settings.conf file and make sure that the asset tag in Kandji matches the asset tag in Snipe-IT, where Snipe-IT's info is considered the authority.
+When an asset is first created, it will fill out only the most basic information. If the asset already exists in your Snipe-IT inventory, the tool will sync the information you specify in the settings.conf file and make sure that the asset tag in Kandji matches the asset tag in Snipe-IT, where Snipe-IT's asset tag for that device is considered the authority.
 
-If the asset tag field is blank in Kandji when the record is being created in Snipe-IT, the script will create an asset tag with KANDJI-$SERIAL_NUMBER unless you enable custom patterns in your settings.conf file.
+If the asset tag field is blank in Kandji when the record is being created in Snipe-IT, the script will create an asset tag with `KANDJI-$SERIAL_NUMBER` unless you enable `use_custom_pattern` in your `settings.conf` file.
 
 ## Requirements:
 
@@ -40,13 +42,13 @@ If the asset tag field is blank in Kandji when the record is being created in Sn
 
 ## Configuration - settings.conf:
 
-All of the bold keys below are required in your [settings.conf.example](https://github.com/briangoldstein/kandji2snipe/blob/main/settings.conf.example) file. Please review the file for example settings and additional details.
+All of the keys highlighted in **bold** below are *required* in your `settings.conf` file. Please review the [settings.conf.example](https://github.com/briangoldstein/kandji2snipe/blob/main/settings.conf.example) file for example settings and additional details.
 
 Note: do not add `""` or `''` around any values.
 
 **[kandji]**
 
-- **`tenant`**: Your tenant name, for example beekeeper.kandji.io would be **beekeepr**
+- **`tenant`**: Your tenant name, for example accuhive.kandji.io would be **accuhive**
 - **`region`**: **us** or **eu**
 - **`apitoken`**: Your [Kandji API token](https://support.kandji.io/support/solutions/articles/72000560412-kandji-api)
 
@@ -54,7 +56,7 @@ Note: do not add `""` or `''` around any values.
 
 - **`url`**: The base URL for your Snipe-IT instance (ie https://snipeit.example.com)
 - **`apikey`**: Your [Snipe-IT API key](https://snipe-it.readme.io/reference#generating-api-tokens)
-- **`time_zone`**: The time zone that your Snipe-IT instance is set to.  Refer to APP_TIMEZONE= in your Snipe-IT .env file.
+- **`time_zone`**: The time zone that your Snipe-IT instance is set to.  Refer to `APP_TIMEZONE=` in your Snipe-IT .env file.
 - **`manufacturer_id`**: The manufacturer database field id for the Apple in your Snipe-IT instance.
 - **`defaultStatus`**: The status database field id to assign to new assets created in Snipe-IT from Kandji. Typically you will want to pick a status like "Ready To Deploy".
 - **`mac_model_category_id`**: The ID of the category you want to assign to Mac computers. You will have to create this in Snipe-IT and note the Category ID.
@@ -85,11 +87,11 @@ Note: do not add `""` or `''` around any values.
   
 ### API Mapping
 
-To get the database fields for Snipe-IT Custom Fields, go to Custom Fields, scroll down past Fieldsets to Custom Fields, click the column selection and button and select the unchecked 'DB Field' checkbox. Copy and paste the DB Field name for the Snipe under *platform*-api-mapping sections in settings.conf.
+To get the database fields for Snipe-IT Custom Fields, go to Settings and then Custom Fields inside of your Snipe-IT instance, scroll down past Fieldsets to Custom Fields, click the column selection button and make sure the 'DB Field' checkbox is checked. Copy and paste the DB Field name for Snipe-IT under *platform*-api-mapping sections in your `settings.conf` file.
 
-To get the API mapping fields for Kandji, refer to Kandji's [Device Details](https://api.kandji.io/#efa2170d-e5f7-4b97-8f4c-da6f84ba58b5) API example response.
+To get the API mapping fields for Kandji, refer to Kandji's [Device Details](https://api-docs.kandji.io/#e320f334-d7d4-4c15-b75d-bc956b2943d5) API example response.
 
-You need to set the manufacturer_id for Apple devices in the settings.conf file.  To get this, go to Manufacturers, click the column selection button and select the `ID` checkbox.
+You need to set the `manufacturer_id` for Apple devices in the `settings.conf` file. You can grab the `manufacturer_id` in Snipe-IT by going to Manufacturers > click the column selection button > select the `ID` checkbox.
 
 Some example API mappings can be found below:
 
