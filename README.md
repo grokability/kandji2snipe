@@ -89,7 +89,7 @@ Note: do not add `""` or `''` around any values.
 
 To get the database fields for Snipe-IT Custom Fields, go to Settings and then Custom Fields inside of your Snipe-IT instance, scroll down past Fieldsets to Custom Fields, click the column selection button and make sure the 'DB Field' checkbox is checked. Copy and paste the DB Field name for Snipe-IT under *platform*-api-mapping sections in your `settings.conf` file.
 
-To get the API mapping fields for Kandji, refer to Kandji's [Device Details](https://api-docs.kandji.io/#e320f334-d7d4-4c15-b75d-bc956b2943d5) API example response.
+To get the API mapping fields for Kandji, refer to Kandji's [Device Details](https://api-docs.kandji.io/#efa2170d-e5f7-4b97-8f4c-da6f84ba58b5) API example response.
 
 You need to set the `manufacturer_id` for Apple devices in the `settings.conf` file. You can grab the `manufacturer_id` in Snipe-IT by going to Manufacturers > click the column selection button > select the `ID` checkbox.
 
