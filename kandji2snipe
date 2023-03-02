@@ -16,7 +16,7 @@
 #   the README at https://github.com/briangoldstein/kandji2snipe
 #
 
-version = "0.2.0"
+version = "0.3.0"
 
 # Standard Library Imports
 import json
@@ -185,11 +185,11 @@ def create_variables():
     logging.info('Creating variables from settings.conf')
 
     # Kandji Base URL
-    if config['kandji']['region'] == "us":
-        kandji_base = f"https://{config['kandji']['tenant']}.clients.{config['kandji']['region']}-1.kandji.io"
+    if config['kandji']['region'] == "eu":
+        kandji_base = f"https://{config['kandji']['tenant']}.api.eu.kandji.io"
         logging.info("The Kandji base url is: {}".format(kandji_base))
     else:
-        kandji_base = f"https://{config['kandji']['tenant']}.clients.{config['kandji']['region']}.kandji.io"
+        kandji_base = f"https://{config['kandji']['tenant']}.api.kandji.io"
         logging.info("The Kandji base url is: {}".format(kandji_base))
 
     # Kandji API Token
