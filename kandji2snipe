@@ -13,10 +13,10 @@
 #
 # CONFIGURATION:
 #   kandji2snipe settings are set in the settings.conf file. For more detais please see
-#   the README at https://github.com/briangoldstein/kandji2snipe
+#   the README at https://github.com/grokability/kandji2snipe
 #
 
-version = "0.3.0"
+version = "1.0.0"
 
 # Standard Library Imports
 import json
@@ -882,7 +882,7 @@ for kandji_device_type in kandji_device_types:
             kandji_device_activity = get_kandji_device_activity_date(kandji['general']['device_id'])
             kandji_time_conversion = datetime.strptime(kandji_device_activity['activity']['results'][-1]['created_at'], '%Y-%m-%dT%H:%M:%S.%fZ')
             kandji_time_conversion = pytz.timezone('UTC').localize(kandji_time_conversion)
-            kandji_time_conversion = kandji_time_conversion.astimezone(pytz.timezone(config['snipe-it']['time_zone']))
+            kandji_time_conversion = kandji_time_conversion.astimezone(pytz.timezone(config['snipe-it']['timezone']))
             kandji_time = kandji_time_conversion.strftime('%Y-%m-%d %H:%M:%S')
 
             # Check to see that the Kandji record is newer than the previous Snipe-IT update, or if it is a new record in Snipe-IT

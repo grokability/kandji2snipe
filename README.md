@@ -57,7 +57,7 @@ Note: do not add `""` or `''` around any values.
 - **`url`**: The base URL for your Snipe-IT instance (ie https://snipeit.example.com)
 - **`apikey`**: Your [Snipe-IT API key](https://snipe-it.readme.io/reference#generating-api-tokens)
 - **`time_zone`**: The time zone that your Snipe-IT instance is set to.  Refer to `APP_TIMEZONE=` in your Snipe-IT .env file.
-- **`manufacturer_id`**: The manufacturer database field id for the Apple in your Snipe-IT instance.
+- **`manufacturer_id`**: The manufacturer database field id for Apple in your Snipe-IT instance.
 - **`defaultStatus`**: The status database field id to assign to new assets created in Snipe-IT from Kandji. Typically you will want to pick a status like "Ready To Deploy".
 - **`mac_model_category_id`**: The ID of the category you want to assign to Mac computers. You will have to create this in Snipe-IT and note the Category ID.
 - **`iphone_model_category_id`**: The ID of the category you want to assign to iPhones. You will have to create this in Snipe-IT and note the Category ID.
@@ -76,6 +76,11 @@ Note: do not add `""` or `''` around any values.
 - `pattern_ipad`: The pattern to use when creating new iPads in Snipe-IT that do not have an asset tag in Kandji.
 - `pattern_appletv`: The pattern to use when creating new Apple TVs in Snipe-IT that do not have an asset tag in Kandji.
 
+<br>
+
+>**Note:** <br>
+>The following sections require custom fields to be created in Snipe-IT. Please see the [API Mapping](#api-mapping) section for details.
+
 **[mac-api-mapping]**
 
 **[iphone-api-mapping]**
@@ -84,6 +89,7 @@ Note: do not add `""` or `''` around any values.
 
 **[appletv-api-mapping]**
 
+
   
 ### API Mapping
 
@@ -91,17 +97,15 @@ To get the database fields for Snipe-IT Custom Fields, go to Settings and then C
 
 To get the API mapping fields for Kandji, refer to Kandji's [Device Details](https://api-docs.kandji.io/#efa2170d-e5f7-4b97-8f4c-da6f84ba58b5) API example response.
 
-You need to set the `manufacturer_id` for Apple devices in the `settings.conf` file. You can grab the `manufacturer_id` in Snipe-IT by going to Manufacturers > click the column selection button > select the `ID` checkbox.
-
 Some example API mappings can be found below:
 
-- Computer Name:		`name = general name`
 - MAC Address:		`_snipeit_<your_mac_address_custom_field_id> = general mac_address`
 - IPv4 Address:		`_snipeit_<your_IPv4_custom_field_id> = general ip_address`
 - Blueprint Name:		`_snipeit_<your_blueprint_custom_field_id>_ = general blueprint_name`
 - FileVault Status:		`_snipeit_<your_filevault_enabled_custom_field_id> = filevault filevault_enabled`
 - Kandji Device ID:			`_snipeit_<your_device_id_custom_field_id> = general device_id`
 
+You need to set the `manufacturer_id` for Apple devices in the `settings.conf` file. You can grab the `manufacturer_id` in Snipe-IT by going to Manufacturers > click the column selection button > select the `ID` checkbox.
 
 ## Usage
 ```
