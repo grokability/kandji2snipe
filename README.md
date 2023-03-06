@@ -19,7 +19,7 @@ If the asset tag field is blank in Kandji when the record is being created in Sn
 - Python dependencies - Can be installed using the included `requirements.txt` using the command `python3 -m pip install -r requirements.txt` or individually using the commands `python3 -m pip install requests` and `python3 -m pip install pytz`.
 - A [Kandji API token](https://support.kandji.io/support/solutions/articles/72000560412-kandji-api) with the following permissions:
   - Devices
-    - Updated a Device
+    - Update a device
     - Device details
     - Device list
     - Device ID
@@ -42,7 +42,7 @@ If the asset tag field is blank in Kandji when the record is being created in Sn
 
 ## Configuration - settings.conf:
 
-All of the keys highlighted in **bold** below are *required* in your `settings.conf` file. Please review the [settings.conf.example](https://github.com/briangoldstein/kandji2snipe/blob/main/settings.conf.example) file for example settings and additional details.
+All of the keys highlighted in **bold** below are *required* in your `settings.conf` file. Please review the [settings.conf.example](https://github.com/grokability/kandji2snipe/blob/main/settings.conf.example) file for example settings and additional details.
 
 Note: do not add `""` or `''` around any values.
 
@@ -70,7 +70,7 @@ Note: do not add `""` or `''` around any values.
 
 
 **[asset-tag]**
-- **`use_custom_pattern`**: Set to **yes** to set your own patterns, if set to **no**, devices with no existing asset tag in Kandji will default to `KANDJI-$SIERAL_NUMBER`.
+- **`use_custom_pattern`**: Set to **yes** to set your own patterns, if set to **no**, devices with no existing asset tag in Kandji will default to `KANDJI-$SERIAL_NUMBER`.
 - `pattern_mac`: The pattern to use when creating new Macs in Snipe-IT that do not have an asset tag in Kandji.
 - `pattern_iphone`: The pattern to use when creating new iPhones in Snipe-IT that do not have an asset tag in Kandji.
 - `pattern_ipad`: The pattern to use when creating new iPads in Snipe-IT that do not have an asset tag in Kandji.
