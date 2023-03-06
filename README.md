@@ -144,4 +144,4 @@ If you do not have a test/dev Kandji tenant, you can test kandji2snipe using the
 
 ## Contributing
 
-If you have something you'd like to add please help by forking this project then creating a pull request to the `devel` branch. When working on new features, please try to keep existing configs running in the same manner with no changes. When possible, open up an issue and reference it when you make your pull request.
+If you have something you'd like to add please help by forking this project then creating a pull request to the `develop` branch. When working on new features, please try to keep existing configs running in the same manner with no changes. When possible, open up an issue and reference it when you make your pull request.
