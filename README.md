@@ -23,6 +23,7 @@ If the asset tag field is blank in Kandji when the record is being created in Sn
     - Device details
     - Device list
     - Device ID
+    - Device Activity
 - A [Snipe-IT API key](https://snipe-it.readme.io/reference#generating-api-tokens) for a user with the following permissions:
   - Assets
     - View
