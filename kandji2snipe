@@ -27,6 +27,7 @@ import logging
 import sys
 import html
 from datetime import datetime
+import os
 
 # 3rd Party Imports
 try:
@@ -193,13 +194,20 @@ def create_variables():
         logging.info("The Kandji base url is: {}".format(kandji_base))
 
     # Kandji API Token
-    kandji_apitoken = config['kandji']['apitoken']
+    kandji_apitoken = os.environ.get("KANDJI_API_TOKEN")
+    if kandji_apitoken is None:
+        kandji_apitoken = config['kandji']['apitoken']
     logging.debug("The Kandji API token is: {}".format(kandji_apitoken))
 
     # Snipe-IT base URL, API key, default status, and Apple manufacturer ID
     snipe_base = config['snipe-it']['url']
     logging.info("The Snipe-IT base url is: {}".format(snipe_base))
-    snipe_apikey = config['snipe-it']['apikey']
+    
+    # Snipe API Key
+    snipe_apikey = os.environ.get("SNIPE_APIKEY")
+    if snipe_apikey is None:
+        snipe_apikey = config['snipe-it']['apikey']
+        
     logging.debug("The Snipe-IT API key is: {}".format(snipe_apikey))
     defaultStatus = config['snipe-it']['defaultStatus']
     logging.info("Status ID for new assets created in Snipe-IT: {}".format(defaultStatus))
