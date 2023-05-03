@@ -122,16 +122,16 @@ def get_settings():
         logging.error('Invalid Kandji Region, check your settings.conf and try again.')
         sys.exit(exit_error_message)
 
-    if config['kandji']['apitoken'] == "kandji-api-bearer-token-here" or config['kandji']['apitoken'] == "":
-        logging.error('Invalid Kandji API Token, check your settings.conf and try again.')
+    if config['kandji']['apitoken'] == "kandji-api-bearer-token-here" or config['kandji']['apitoken'] == "" or os.environ.get("KANDJI_APITOKEN") == "":
+        logging.error('Invalid Kandji API Token, check your settings.conf or environment variables and try again.')
         sys.exit(exit_error_message)
 
     if config['snipe-it']['url'] == "https://your_snipe_instance.com"or config['snipe-it']['url'] == "":
         logging.error('Invalid Snipe-IT URL, check your settings.conf and try again.')
         sys.exit(exit_error_message)
 
-    if config['snipe-it']['apikey'] == "snipe-api-key-here" or config['snipe-it']['apikey'] == "":
-        logging.error('Invalid Snipe-IT API Key, check your settings.conf and try again.')
+    if config['snipe-it']['apikey'] == "snipe-api-key-here" or config['snipe-it']['apikey'] == "" or os.environ.get("SNIPE_APIKEY") == "":
+        logging.error('Invalid Snipe-IT API Key, check your settings.conf or environment variables and try again.')
         sys.exit(exit_error_message)
 
     if config['snipe-it']['mac_custom_fieldset_id'] != "":
@@ -194,9 +194,7 @@ def create_variables():
         logging.info("The Kandji base url is: {}".format(kandji_base))
 
     # Kandji API Token
-    kandji_apitoken = os.environ.get("KANDJI_API_TOKEN")
-    if kandji_apitoken is None:
-        kandji_apitoken = config['kandji']['apitoken']
+    kandji_apitoken = os.environ.get("KANDJI_APITOKEN", config['kandji']['apitoken'])
     logging.debug("The Kandji API token is: {}".format(kandji_apitoken))
 
     # Snipe-IT base URL, API key, default status, and Apple manufacturer ID
@@ -204,11 +202,9 @@ def create_variables():
     logging.info("The Snipe-IT base url is: {}".format(snipe_base))
     
     # Snipe API Key
-    snipe_apikey = os.environ.get("SNIPE_APIKEY")
-    if snipe_apikey is None:
-        snipe_apikey = config['snipe-it']['apikey']
-        
+    snipe_apikey = os.environ.get("SNIPE_APIKEY",config['snipe-it']['apikey'])
     logging.debug("The Snipe-IT API key is: {}".format(snipe_apikey))
+    
     defaultStatus = config['snipe-it']['defaultStatus']
     logging.info("Status ID for new assets created in Snipe-IT: {}".format(defaultStatus))
     apple_manufacturer_id = config['snipe-it']['manufacturer_id']
