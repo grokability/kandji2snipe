@@ -47,6 +47,12 @@ All of the keys highlighted in **bold** below are *required* in your `settings.c
 
 Note: do not add `""` or `''` around any values.
 
+API tokens can also be provided via environment variables for additional security.
+```bash
+export KANDJI_APITOKEN=kandji-api-bearer-token-here
+export SNIPE_APIKEY=snipe-api-key-here
+```
+
 **[kandji]**
 
 - **`tenant`**: Your tenant name, for example accuhive.kandji.io would be **accuhive**
