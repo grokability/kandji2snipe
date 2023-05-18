@@ -475,31 +475,41 @@ def search_snipe_asset(serial):
 
 # Function to get all the asset models from Snipe-IT
 def get_snipe_models():
-    api_url = '{}/api/v1/models'.format(snipe_base)
-    logging.debug('Calling against: {}'.format(api_url))
-    response = requests.get(api_url, headers=snipeheaders, verify=user_args.do_not_verify_ssl, hooks={'response': request_handler})
-    if response.status_code == 200:
-        jsonresponse = response.json()
-        logging.info("Got a valid response that should have {} models.".format(jsonresponse['total']))
-        if jsonresponse['total'] <= len(jsonresponse['rows']) :
-            return jsonresponse
+    models = []
+    limit = 100
+    offset = 0
+    while True:
+        api_url = "{}/api/v1/models?limit={}&offset={}".format(
+            snipe_base, limit, offset
+        )
+
+        logging.debug(f"Calling against: {api_url}")
+
+        response = requests.get(
+            api_url,
+            headers=snipeheaders,
+            verify=user_args.do_not_verify_ssl,
+            hooks={"response": request_handler},
+        )
+        if response.status_code == 200:
+            jsonresponse = response.json()
+            logging.info(
+                "We found  {} Assets and already loaded {}".format(
+                    jsonresponse["total"],len(models) 
+                )
+            )
+            models.extend(jsonresponse["rows"])
+            offset += limit
+            if len(jsonresponse["rows"]) < limit:
+                return {"rows": models}
+
         else:
-            logging.info("We didn't get enough results so we need to get them again.")
-            api_url = '{}/api/v1/models?limit={}'.format(snipe_base, jsonresponse['total'])
-            newresponse = requests.get(api_url, headers=snipeheaders, verify=user_args.do_not_verify_ssl, hooks={'response': request_handler})
-            if response.status_code == 200:
-                newjsonresponse = newresponse.json()
-                if newjsonresponse['total'] == len(newjsonresponse['rows']) :
-                    return newjsonresponse
-                else:
-                    logging.error("Unable to get all models from Snipe-IT")
-                    sys.exit(exit_error_message)
-            else:
-                logging.error('When we tried to retreive a list of models, Snipe-IT responded with error status code:{} - {}'.format(response.status_code, response.content))
-                sys.exit(exit_error_message)
-    else:
-        logging.error('When we tried to retreive a list of models, Snipe-IT responded with error status code:{} - {}'.format(response.status_code, response.content))
-        sys.exit(exit_error_message)
+            logging.error(
+                "When we tried to retreive a list of models, Snipe-IT responded with error status code:{} - {}".format(
+                    response.status_code, response.content
+                )
+            )
+            sys.exit(exit_error_message)
 
 # Recursive function returns all users in a Snipe-IT Instance, 100 at a time.
 def get_snipe_users(previous=[]):
