@@ -495,10 +495,10 @@ def get_snipe_models():
                     logging.error("Unable to get all models from Snipe-IT")
                     sys.exit(exit_error_message)
             else:
-                logging.error('When we tried to retreive a list of models, Snipe-IT responded with error status code:{} - {}'.format(response.status_code, response.content))
+                logging.error('When we tried to retrieve a list of models, Snipe-IT responded with error status code:{} - {}'.format(response.status_code, response.content))
                 sys.exit(exit_error_message)
     else:
-        logging.error('When we tried to retreive a list of models, Snipe-IT responded with error status code:{} - {}'.format(response.status_code, response.content))
+        logging.error('When we tried to retrieve a list of models, Snipe-IT responded with error status code:{} - {}'.format(response.status_code, response.content))
         sys.exit(exit_error_message)
 
 # Recursive function returns all users in a Snipe-IT Instance, 100 at a time.
@@ -742,7 +742,7 @@ else:
 if TotalNumber != None:
     logging.info('Received a list of Kandji assets that had {} entries.'.format(TotalNumber))
 else:
-    logging.error("We were not able to retreive a list of assets from your Kandji instance. It's likely that your settings or credentials are incorrect. Check your settings.conf and verify you can make API calls outside of this system with the credentials found in your settings.conf")
+    logging.error("We were not able to retrieve a list of assets from your Kandji instance. It's likely that your settings or credentials are incorrect. Check your settings.conf and verify you can make API calls outside of this system with the credentials found in your settings.conf")
     sys.exit(exit_error_message)
 
 # After this point we start editing data, so quit if this is a dry run
