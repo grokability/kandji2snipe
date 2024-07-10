@@ -88,9 +88,9 @@ validarrays = [
         "security_information"
 ]
 
-# Define Functions 
+# Define Functions
 
-# Find and validate the settings.conf file  
+# Find and validate the settings.conf file
 def get_settings():
     # Find a valid settings.conf file.
     logging.info("Searching for a valid settings.conf file.")
@@ -184,7 +184,7 @@ def create_variables():
     global snipeheaders
     global defaultStatus
     global apple_manufacturer_id
-    
+
     logging.info('Creating variables from settings.conf')
 
     # Kandji Base URL
@@ -202,11 +202,11 @@ def create_variables():
     # Snipe-IT base URL, API key, default status, and Apple manufacturer ID
     snipe_base = config['snipe-it']['url']
     logging.info("The Snipe-IT base url is: {}".format(snipe_base))
-    
+
     # Snipe API Key
     snipe_apikey = os.environ.get("SNIPE_APIKEY",config['snipe-it']['apikey'])
     logging.debug("The Snipe-IT API key is: {}".format(snipe_apikey))
-    
+
     defaultStatus = config['snipe-it']['defaultStatus']
     logging.info("Status ID for new assets created in Snipe-IT: {}".format(defaultStatus))
     apple_manufacturer_id = config['snipe-it']['manufacturer_id']
@@ -394,7 +394,7 @@ def kandji_api(method, endpoint, params=None, payload=None):
 
     return data
 
-# Function to get device records from Kandji 
+# Function to get device records from Kandji
 def get_kandji_devices(platform):
     count = 0
     # dict placeholder for params passed to api requests
@@ -674,7 +674,7 @@ if user_args.users_no_search and not user_args.users:
     logging.error("The -uns option requires the use of -u for user syncing.")
     sys.exit(exit_error_message)
 
-# Find and validate the settings.conf file  
+# Find and validate the settings.conf file
 get_settings()
 
 # Create variables based on setings.conf values
@@ -752,7 +752,7 @@ if user_args.dryrun and user_args.logfile:
 elif user_args.dryrun:
     logging.info('Dry Run: Complete')
     sys.exit()
-    
+
 # From this point on, we're editing data.
 logging.info('Starting to Update Inventory')
 CurrentNumber = 0
