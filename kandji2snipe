@@ -62,7 +62,7 @@ from requests.adapters import HTTPAdapter
 # Define runtime arguments
 runtimeargs = argparse.ArgumentParser()
 runtimeargs.add_argument("-l", "--logfile", help="Saves logging messages to kandji2snipe.log instead of displaying on screen.", action="store_true")
-runtimeargs.add_argument("-j", "--log_json", help="Saves logging messages to console in JSON format.", action="store_true")
+runtimeargs.add_argument("-j", "--log-json", help="Saves logging messages to console in JSON format.", action="store_true")
 runtimeargs.add_argument("-v", "--verbose", help="Sets the logging level to INFO and gives you a better idea of what the script is doing.", action="store_true")
 runtimeargs.add_argument("-d", "--debug", help="Sets logging to include additional DEBUG messages.", action="store_true")
 runtimeargs.add_argument("--dryrun", help="This checks your config and tries to contact both the Kandji and Snipe-IT instances, but exits before updating or syncing any assets.", action="store_true")
