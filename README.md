@@ -123,6 +123,7 @@ optional arguments:
   -l, --logfile           Saves logging messages to kandji2snipe.log instead of displaying on screen.
   -v, --verbose           Sets the logging level to INFO and gives you a better idea of what the script is doing.
   -d, --debug             Sets logging to include additional DEBUG messages.
+  -c, --config-file       Sets the configuration file to load.
   --dryrun                This checks your config and tries to contact both the Kandji and Snipe-IT instances, but exits before updating or syncing any assets.
   --version               Shows the version of this script and exits.
   --auto_incrementing     You can use this if you have auto-incrementing enabled in your Snipe-IT instance to utilize that instead of using KANDJI-<SERIAL NUMBER> for the asset tag.
