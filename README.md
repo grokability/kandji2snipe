@@ -121,6 +121,7 @@ usage: kandji2snipe [-h] [-l] [-v] [-d] [--dryrun] [--version] [--auto_increment
 optional arguments:
   -h, --help              Shows this help message and exits.
   -l, --logfile           Saves logging messages to kandji2snipe.log instead of displaying on screen.
+  -j, --log-json          Saves logging messages to console in JSON format.
   -v, --verbose           Sets the logging level to INFO and gives you a better idea of what the script is doing.
   -d, --debug             Sets logging to include additional DEBUG messages.
   --dryrun                This checks your config and tries to contact both the Kandji and Snipe-IT instances, but exits before updating or syncing any assets.
