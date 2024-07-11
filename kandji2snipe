@@ -12,7 +12,7 @@
 #   MIT
 #
 # CONFIGURATION:
-#   kandji2snipe settings are set in the settings.conf file. For more detais please see
+#   kandji2snipe settings are set in the configuration file. For more detais please see
 #   the README at https://github.com/grokability/kandji2snipe
 #
 
@@ -27,6 +27,7 @@ import logging
 import sys
 import html
 from datetime import datetime
+from pathlib import Path
 import os
 
 # 3rd Party Imports
@@ -55,6 +56,7 @@ runtimeargs = argparse.ArgumentParser()
 runtimeargs.add_argument("-l", "--logfile", help="Saves logging messages to kandji2snipe.log instead of displaying on screen.", action="store_true")
 runtimeargs.add_argument("-v", "--verbose", help="Sets the logging level to INFO and gives you a better idea of what the script is doing.", action="store_true")
 runtimeargs.add_argument("-d", "--debug", help="Sets logging to include additional DEBUG messages.", action="store_true")
+runtimeargs.add_argument("-c", "--config-file", help="Sets the config file to load.")
 runtimeargs.add_argument("--dryrun", help="This checks your config and tries to contact both the Kandji and Snipe-IT instances, but exits before updating or syncing any assets.", action="store_true")
 runtimeargs.add_argument("--version", help="Prints the version of this script and exits.", action="store_true")
 runtimeargs.add_argument("--auto_incrementing", help="You can use this if you have auto-incrementing enabled in your Snipe-IT instance to utilize that instead of using KANDJI-<SERIAL NUMBER> for the asset tag.", action="store_true")
@@ -88,52 +90,58 @@ validarrays = [
         "security_information"
 ]
 
+DEFAULT_CONFIG_FILE_PATHS = [
+    "/etc/kandji2snipe/settings.conf",
+    "/opt/kandji2snipe/settings.conf",
+    "./settings.conf"
+]
+
 # Define Functions 
 
-# Find and validate the settings.conf file  
+# Find and validate the configuration file
 def get_settings():
-    # Find a valid settings.conf file.
-    logging.info("Searching for a valid settings.conf file.")
+    # Find a valid configuration file.
+    logging.info("Searching for a valid configuration file.")
     global config
     config = configparser.ConfigParser()
-    logging.debug("Checking for a settings.conf in /opt/kandji2snipe ...")
-    config.read("/opt/kandji2snipe/settings.conf")
+
+    if user_args.config_file and Path(user_args.config_file).is_file():
+        config.read(user_args.config_file)
+        logging.info("Found user supplied configuration file: " + user_args.config_file)
+    else:
+        for path in DEFAULT_CONFIG_FILE_PATHS:
+            if Path(path).is_file():
+                config.read(path)
+                logging.info("Found configuration file in default search path: " + path)
+
+    # Check for valid configuration
     if 'snipe-it' not in set(config):
-        logging.debug("No valid config found in: /opt Checking for a settings.conf in /etc/kandji2snipe ...")
-        config.read('/etc/kandji2snipe/settings.conf')
-    if 'snipe-it' not in set(config):
-        logging.debug("No valid config found in /etc Checking for a settings.conf in current directory ...")
-        config.read("settings.conf")
-    if 'snipe-it' not in set(config):
-        logging.debug("No valid config found in current folder.")
-        logging.error("No valid settings.conf was found. Refer to the README for valid locations.")
+        logging.error("No valid configuration file was found. Refer to the README for valid locations.")
         sys.exit(exit_error_message)
 
-    logging.info("Settings.conf found.")
-
-    # Settings.conf Value Validation - Ensuring some important settings are not empty or default values
-    logging.debug("Checking the settings.conf file for valid values.")
+    # Value Validation - Ensuring some important settings are not empty or default values
+    logging.debug("Checking the configuration file for valid values.")
 
     if config['kandji']['tenant'] == "TENANTNAME" or config['kandji']['tenant'] == "":
-        logging.error('Error: Invalid Kandji Tenant, check your settings.conf and try again.')
+        logging.error('Error: Invalid Kandji Tenant, check your configuration file and try again.')
         sys.exit(exit_error_message)
 
     if config['kandji']['region'] != "us" and config['kandji']['region'] != "eu":
-        logging.error('Invalid Kandji Region, check your settings.conf and try again.')
+        logging.error('Invalid Kandji Region, check your configuration file and try again.')
         sys.exit(exit_error_message)
 
     if os.environ.get("KANDJI_APITOKEN") == "":
         if config['kandji']['apitoken'] == "kandji-api-bearer-token-here" or config['kandji']['apitoken'] == "" :
-            logging.error('Invalid Kandji API Token, check your settings.conf or environment variables and try again.')
+            logging.error('Invalid Kandji API Token, check your configuration file or environment variables and try again.')
             sys.exit(exit_error_message)
 
     if config['snipe-it']['url'] == "https://your_snipe_instance.com"or config['snipe-it']['url'] == "":
-        logging.error('Invalid Snipe-IT URL, check your settings.conf and try again.')
+        logging.error('Invalid Snipe-IT URL, check your configuration file and try again.')
         sys.exit(exit_error_message)
 
     if os.environ.get("SNIPE_APIKEY") == "":
         if config['snipe-it']['apikey'] == "snipe-api-key-here" or config['snipe-it']['apikey'] == "" :
-            logging.error('Invalid Snipe-IT API Key, check your settings.conf or environment variables and try again.')
+            logging.error('Invalid Snipe-IT API Key, check your configuration file or environment variables and try again.')
             sys.exit(exit_error_message)
 
     if config['snipe-it']['mac_custom_fieldset_id'] != "":
@@ -143,7 +151,7 @@ def get_settings():
                 logging.debug('Found valid array: {}'.format(kandjisplit[0]))
                 continue
             else:
-                logging.error("Found invalid array: {} in the settings.conf file.\nThis is not in the acceptable list of arrays. Check your settings.conf\n Valid arrays are: {}".format(kandjisplit[0], ', '.join(validarrays)))
+                logging.error("Found invalid array: {} in the configuration file.\nThis is not in the acceptable list of arrays. Check your configuration file\n Valid arrays are: {}".format(kandjisplit[0], ', '.join(validarrays)))
                 sys.exit(exit_error_message)
     if config['snipe-it']['iphone_custom_fieldset_id'] != "":
         for key in config['iphone-api-mapping']:
@@ -152,7 +160,7 @@ def get_settings():
                 logging.debug('Found valid array: {}'.format(kandjisplit[0]))
                 continue
             else:
-                logging.error("Found invalid array: {} in the settings.conf file.\nThis is not in the acceptable list of arrays. Check your settings.conf\n Valid arrays are: {}".format(kandjisplit[0], ', '.join(validarrays)))
+                logging.error("Found invalid array: {} in the configuration file.\nThis is not in the acceptable list of arrays. Check your configuration file\n Valid arrays are: {}".format(kandjisplit[0], ', '.join(validarrays)))
                 sys.exit(exit_error_message)
     if config['snipe-it']['ipad_custom_fieldset_id'] != "":
         for key in config['ipad-api-mapping']:
@@ -161,7 +169,7 @@ def get_settings():
                 logging.debug('Found valid array: {}'.format(kandjisplit[0]))
                 continue
             else:
-                logging.error("Found invalid array: {} in the settings.conf file.\nThis is not in the acceptable list of arrays. Check your settings.conf\n Valid arrays are: {}".format(kandjisplit[0], ', '.join(validarrays)))
+                logging.error("Found invalid array: {} in the configuration file.\nThis is not in the acceptable list of arrays. Check your configuration file\n Valid arrays are: {}".format(kandjisplit[0], ', '.join(validarrays)))
                 sys.exit(exit_error_message)
     if config['snipe-it']['appletv_custom_fieldset_id'] != "":
         for key in config['appletv-api-mapping']:
@@ -170,7 +178,7 @@ def get_settings():
                 logging.debug('Found valid array: {}'.format(kandjisplit[0]))
                 continue
             else:
-                logging.error("Found invalid array: {} in the settings.conf file.\nThis is not in the acceptable list of arrays. Check your settings.conf\n Valid arrays are: {}".format(kandjisplit[0], ', '.join(validarrays)))
+                logging.error("Found invalid array: {} in the configuration file.\nThis is not in the acceptable list of arrays. Check your configuration file\n Valid arrays are: {}".format(kandjisplit[0], ', '.join(validarrays)))
                 sys.exit(exit_error_message)
 
 # Create variables based on setings.conf values
@@ -185,7 +193,7 @@ def create_variables():
     global defaultStatus
     global apple_manufacturer_id
     
-    logging.info('Creating variables from settings.conf')
+    logging.info('Creating variables from configuration file')
 
     # Kandji Base URL
     if config['kandji']['region'] == "eu":
@@ -251,7 +259,7 @@ def snipe_access_test():
         logging.exception(e)
         SNIPE_UP = False
     if not SNIPE_UP:
-        logging.error('Snipe-IT cannot be reached from here. \nPlease check the Snipe-IT url in the settings.conf file.')
+        logging.error('Snipe-IT cannot be reached from here. \nPlease check the Snipe-IT url in the configuration file.')
         sys.exit(exit_error_message)
     else:
         logging.info('We were able to get a good response from your Snipe-IT instance.')
@@ -265,7 +273,7 @@ def kandji_access_test():
         logging.exception(e)
         KANDJI_UP = False
     if not KANDJI_UP:
-        logging.error('Kandji cannot be reached from here. \nPlease check the Kandji tenant and region in the settings.conf file.')
+        logging.error('Kandji cannot be reached from here. \nPlease check the Kandji tenant and region in the configuration file.')
         sys.exit(exit_error_message)
     else:
         logging.info('We were able to get a good response from your Kandji instance.')
@@ -674,7 +682,7 @@ if user_args.users_no_search and not user_args.users:
     logging.error("The -uns option requires the use of -u for user syncing.")
     sys.exit(exit_error_message)
 
-# Find and validate the settings.conf file  
+# Find and validate the configuration file  
 get_settings()
 
 # Create variables based on setings.conf values
@@ -742,7 +750,7 @@ else:
 if TotalNumber != None:
     logging.info('Received a list of Kandji assets that had {} entries.'.format(TotalNumber))
 else:
-    logging.error("We were not able to retrieve a list of assets from your Kandji instance. It's likely that your settings or credentials are incorrect. Check your settings.conf and verify you can make API calls outside of this system with the credentials found in your settings.conf")
+    logging.error("We were not able to retrieve a list of assets from your Kandji instance. It's likely that your settings or credentials are incorrect. Check your configuration file and verify you can make API calls outside of this system with the credentials found in your configuration file")
     sys.exit(exit_error_message)
 
 # After this point we start editing data, so quit if this is a dry run
@@ -822,7 +830,7 @@ for kandji_device_type in kandji_device_types:
             logging.info("Creating a new asset in Snipe-IT for Kandji ID {} - {}".format(kandji['general']['device_id'], kandji['general']['device_name']))
             # This section checks to see if an asset tag exists in Kandji, if not it creates one.
             if kandji['general']['asset_tag'] == '':
-                logging.debug('No asset tag found in Kandji, checking settings.conf for custom asset tag patterns.')
+                logging.debug('No asset tag found in Kandji, checking configuration file for custom asset tag patterns.')
                 # Check for custom patterns and use them if enabled, otherwise use the default pattern.
                 if config['asset-tag']['use_custom_pattern'] == 'yes':
                     logging.debug('Custom asset tag patterns found.')
@@ -839,7 +847,7 @@ for kandji_device_type in kandji_device_types:
                         tag_split = config['asset-tag']['pattern_appletv'].split()
                         kandji_asset_tag = tag_split[0]+kandji['{}'.format(tag_split[1])]['{}'.format(tag_split[2])]
                 else:
-                    logging.debug('No custom asset tag patterns found in settings.conf, using default.')
+                    logging.debug('No custom asset tag patterns found in configuration file, using default.')
                     kandji_asset_tag = 'KANDJI-{}'.format(kandji['hardware_overview']['serial_number'])
             else:
                 kandji_asset_tag = kandji['general']['asset_tag']
