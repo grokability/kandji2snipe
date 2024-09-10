@@ -97,7 +97,7 @@ export SNIPE_APIKEY=snipe-api-key-here
 **[appletv-api-mapping]**
 
 
-  
+
 ### API Mapping
 
 To get the database fields for Snipe-IT Custom Fields, go to Settings and then Custom Fields inside of your Snipe-IT instance, scroll down past Fieldsets to Custom Fields, click the column selection button and make sure the 'DB Field' checkbox is checked. Copy and paste the DB Field name for Snipe-IT under *platform*-api-mapping sections in your `settings.conf` file.
