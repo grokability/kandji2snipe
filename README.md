@@ -70,10 +70,10 @@ export SNIPE_APIKEY=snipe-api-key-here
 - **`iphone_model_category_id`**: The ID of the category you want to assign to iPhones. You will have to create this in Snipe-IT and note the Category ID.
 - **`ipad_model_category_id`**: The ID of the category you want to assign to iPads. You will have to create this in Snipe-IT and note the Category ID.
 - **`appletv_model_category_id`**: The ID of the category you want to assign to Apple TVs. You will have to create this in Snipe-IT and note the Category ID.
-- `mac_custom_fieldset_id`: The ID of the category you want to assign to Mac computers. You will have to create this in Snipe-IT and note the Category ID.
-- `iphone_custom_fieldset_id`: The ID of the category you want to assign to iPhones. You will have to create this in Snipe-IT and note the Category ID.
-- `ipad_custom_fieldset_id`: The ID of the category you want to assign to iPads. You will have to create this in Snipe-IT and note the Category ID.
-- `appletv_custom_fieldset_id`: The ID of the category you want to assign to Apple TVs. You will have to create this in Snipe-IT and note the Category ID.
+- `mac_custom_fieldset_id`: The ID of the Custom Fieldset you want to assign to Mac computers. You will have to create this fieldset in Snipe-IT and note the Fieldset ID.
+- `iphone_custom_fieldset_id`: The ID of the Custom Fieldset you want to assign to iPhones. You will have to create this fieldset in Snipe-IT and note the Fieldset ID.
+- `ipad_custom_fieldset_id`: The ID of the Custom Fieldset you want to assign to iPads. You will have to create this fieldset in Snipe-IT and note the Fieldset ID.
+- `appletv_custom_fieldset_id`: The ID of the Custom Fieldset you want to assign to Apple TVs. You will have to create this fieldset in Snipe-IT and note the Fieldset ID.
 
 
 **[asset-tag]**
