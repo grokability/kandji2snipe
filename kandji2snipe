@@ -778,6 +778,9 @@ for kandji_device_type in kandji_device_types:
         kandji = get_kandji_device_details(kandji_asset['device_id'])
         if kandji == None:
             continue
+        if not kandji['hardware_overview']['model_identifier']:
+            logging.info("The model ID in Kandji is blank. This is probably the device record for an erased device.")
+            continue
 
         # Check that the model number exists in Snipe-IT, if not create it.
         if kandji_device_type == 'mac':
