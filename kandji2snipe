@@ -214,7 +214,7 @@ def create_variables():
 
     # Headers for the API calls
     logging.info("Creating the headers we'll need for API calls")
-    kandjiheaders = {'Authorization': 'Bearer {}'.format(kandji_apitoken),'Accept': 'application/json','Content-Type':'application/json;charset=utf-8','Cache-Control': 'no-cache'}
+    kandjiheaders = {'Authorization': 'Bearer {}'.format(kandji_apitoken),'Accept': 'application/json','Content-Type':'application/json;charset=utf-8','Cache-Control': 'no-cache','User-Agent':'Kandji2Snipe CLI'}
     snipeheaders = {'Authorization': 'Bearer {}'.format(snipe_apikey),'Accept': 'application/json','Content-Type':'application/json'}
     logging.debug('Request headers for Kandji will be: {}\nRequest headers for Snipe-IT will be: {}'.format(kandjiheaders, snipeheaders))
 
