@@ -16,7 +16,7 @@
 #   the README at https://github.com/grokability/kandji2snipe
 #
 
-version = "1.0.0"
+version = "1.1.0"
 
 # Standard Library Imports
 import json
